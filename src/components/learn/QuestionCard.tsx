@@ -343,7 +343,7 @@ export default function QuestionCard({
             {footer}
 
             {feedback && !hideFeedback && (
-                <div className="mt-4 rounded-xl border-l-4 border-gold bg-gold-subtle px-4 py-3">
+                <div className="mt-4 rounded-xl border-l border-gold bg-gold-subtle px-4 py-3">
                     <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
                         <FeedbackIcon aria-hidden /> Teacher’s comment
                     </div>
@@ -351,13 +351,13 @@ export default function QuestionCard({
                 </div>
             )}
             {review?.key?.rubric && (
-                <div className="mt-4 rounded-xl border-l-4 border-info bg-gray-50 px-4 py-3 dark:bg-gray-900">
+                <div className="mt-4 rounded-xl border-l border-info bg-gray-50 px-4 py-3 dark:bg-gray-900">
                     <div className="system-eyebrow mb-1">What a full-marks answer includes</div>
                     <MarkdownContent className="text-sm">{review.key.rubric}</MarkdownContent>
                 </div>
             )}
             {review?.key?.explanation && (
-                <div className="mt-4 rounded-xl border-l-4 border-primary bg-gray-50 px-4 py-3 dark:bg-gray-900">
+                <div className="mt-4 rounded-xl border-l border-primary bg-gray-50 px-4 py-3 dark:bg-gray-900">
                     <div className="system-eyebrow mb-1">Explanation</div>
                     <MarkdownContent className="text-sm">{review.key.explanation}</MarkdownContent>
                 </div>

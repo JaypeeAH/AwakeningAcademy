@@ -218,7 +218,7 @@
 }
 
 .callout {
-    @apply my-5 rounded-xl border-l-4 px-4 py-3;
+    @apply my-5 rounded-xl border-l px-4 py-3;
 }
 
 .callout > :last-child {

@@ -31,7 +31,8 @@ const Table = (props: TableProps) => {
     )
 
     return (
-        <div className={classNames(overflow && 'overflow-x-auto')}>
+        // `relative` keeps absolutely-positioned content (e.g. sr-only header labels) clipped by the scroller
+        <div className={classNames(overflow && 'relative overflow-x-auto')}>
             <Component className={tableClass} {...rest} ref={ref}>
                 {children}
             </Component>

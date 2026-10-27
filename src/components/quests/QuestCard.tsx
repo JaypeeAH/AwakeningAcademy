@@ -21,7 +21,7 @@ export default function QuestCard({ quest, hideCourse, className }: QuestCardPro
     const content = (
         <div
             className={classNames(
-                'subject-accent flex h-full flex-col gap-3 rounded-2xl border border-l-4 border-gray-200 bg-white p-4 transition-colors dark:border-gray-700 dark:bg-gray-800',
+                'subject-accent flex h-full flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors dark:border-gray-700 dark:bg-gray-800',
                 `subject-theme-${quest.course.subject.theme}`,
                 !blocked && 'hover:border-primary dark:hover:border-primary',
                 blocked && 'opacity-75',

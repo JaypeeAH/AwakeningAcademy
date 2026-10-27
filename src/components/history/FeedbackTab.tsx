@@ -52,7 +52,7 @@ export default function FeedbackTab() {
                                 ` · ${entry.commentCount} ${entry.commentCount === 1 ? 'comment' : 'comments'} on your answers`}
                         </p>
                         {entry.feedback && (
-                            <p className="mt-2 line-clamp-3 whitespace-pre-wrap border-l-4 border-gold pl-3 text-sm text-gray-700 dark:text-gray-200">
+                            <p className="mt-2 line-clamp-3 whitespace-pre-wrap border-l border-gold pl-3 text-sm text-gray-700 dark:text-gray-200">
                                 {entry.feedback}
                             </p>
                         )}

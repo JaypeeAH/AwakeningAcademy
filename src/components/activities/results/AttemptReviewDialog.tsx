@@ -80,7 +80,7 @@ export default function AttemptReviewDialog({ attemptId, studentName, onClose }:
                                 </LinkButton>
                             </div>
                             {data.attempt.feedback && (
-                                <div className="mt-3 rounded-xl border-l-4 border-gold bg-gold-subtle px-4 py-2 text-sm">
+                                <div className="mt-3 rounded-xl border-l border-gold bg-gold-subtle px-4 py-2 text-sm">
                                     <span className="mb-0.5 flex items-center gap-1.5 font-semibold text-gold">
                                         <FeedbackIcon aria-hidden /> Your overall comment
                                     </span>

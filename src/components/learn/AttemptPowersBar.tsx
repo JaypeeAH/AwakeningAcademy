@@ -160,7 +160,7 @@ export function AttemptPowersBar({ attemptId, question, powers, onChange, onTime
 export function KnowledgeEchoPanel({ echo }: { echo: AttemptPowers['echoes'][string] | undefined }) {
     if (!echo) return null
     return (
-        <div className="mt-4 rounded-xl border-l-4 border-primary bg-primary-subtle px-4 py-3" role="note">
+        <div className="mt-4 rounded-xl border-l border-primary bg-primary-subtle px-4 py-3" role="note">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
                 <EchoIcon aria-hidden /> Knowledge Echo
             </div>
