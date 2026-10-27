@@ -1,0 +1,74 @@
+/*
+ * Design tokens. Tailwind colour names (tailwind.config.ts) point at these variables, so components use
+ * `bg-primary`, `text-gold`, `border-gray-700`… and never hex values.
+ *
+ * The primary family (--primary, --primary-deep, --primary-mild, --primary-subtle, --neutral) is also written
+ * at runtime by utils/applyThemeSchema from configs/preset-theme-schema.config — keep the two in step.
+ *
+ * Dark is the signature look (near-black + deep navy, electric-blue system light, restrained gold).
+ * Light ("daylight") keeps the same hues at accessible contrast for classrooms and projectors.
+ */
+
+:root {
+    --primary: #1d64d8;
+    --primary-deep: #164fae;
+    --primary-mild: #3b82f6;
+    --primary-subtle: rgb(29 100 216 / 0.1);
+    --neutral: #ffffff;
+
+    --gold: #8a5d00;
+    --gold-mild: #b07a12;
+    --gold-subtle: rgb(176 122 18 / 0.12);
+
+    --error: #dc2626;
+    --error-subtle: rgb(220 38 38 / 0.1);
+    --success: #15803d;
+    --success-subtle: rgb(21 128 61 / 0.1);
+    --warning: #c2410c;
+    --warning-subtle: rgb(194 65 12 / 0.1);
+    --info: #1d64d8;
+    --info-subtle: rgb(29 100 216 / 0.1);
+
+    /* Blue-tinted neutrals: the same scale serves light surfaces (50–200) and dark surfaces (700–950). */
+    --gray-50: #f5f7fb;
+    --gray-100: #e9edf5;
+    --gray-200: #d3dae8;
+    --gray-300: #b3bed3;
+    --gray-400: #8a97b2;
+    --gray-500: #67758f;
+    --gray-600: #4a5670;
+    --gray-700: #263149;
+    --gray-800: #121a2e;
+    --gray-900: #0b1222;
+    --gray-950: #060a14;
+
+    /* "System window" glow used by game panels (game/_system.css) */
+    --glow: rgb(29 100 216 / 0.25);
+    --glow-strong: rgb(29 100 216 / 0.45);
+}
+
+.dark {
+    --primary: #38a3ff;
+    --primary-deep: #1f84e6;
+    --primary-mild: #6cbcff;
+    --primary-subtle: rgb(56 163 255 / 0.14);
+    --neutral: #050b18;
+
+    --gold: #e8b64c;
+    --gold-mild: #f3cd78;
+    --gold-subtle: rgb(232 182 76 / 0.14);
+
+    --error: #ff5d6c;
+    --error-subtle: rgb(255 93 108 / 0.14);
+    --success: #34d399;
+    --success-subtle: rgb(52 211 153 / 0.14);
+    --warning: #fb923c;
+    --warning-subtle: rgb(251 146 60 / 0.14);
+    --info: #38a3ff;
+    --info-subtle: rgb(56 163 255 / 0.14);
+
+    --glow: rgb(56 163 255 / 0.28);
+    --glow-strong: rgb(56 163 255 / 0.55);
+
+    color-scheme: dark;
+}

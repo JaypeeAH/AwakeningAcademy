@@ -1,0 +1,103 @@
+/*
+ * Rank tones (F → SSS). Each sets four variables used by components/game/RankEmblem and rank tags:
+ *   --rank-a / --rank-b  gradient ends   --rank-c  highlight   --rank-text  letter colour
+ * Gold is kept for S and above so it stays special.
+ */
+
+.rank-tone-iron {
+    --rank-a: #8a97b2;
+    --rank-b: #4a5670;
+    --rank-c: #b3bed3;
+    --rank-text: #4a5670;
+}
+.rank-tone-jade {
+    --rank-a: #34d399;
+    --rank-b: #0f766e;
+    --rank-c: #6ee7b7;
+    --rank-text: #0f766e;
+}
+.rank-tone-tide {
+    --rank-a: #22d3ee;
+    --rank-b: #0e7490;
+    --rank-c: #67e8f9;
+    --rank-text: #0e7490;
+}
+.rank-tone-azure {
+    --rank-a: #38a3ff;
+    --rank-b: #1d4ed8;
+    --rank-c: #93c5fd;
+    --rank-text: #1d4ed8;
+}
+.rank-tone-violet {
+    --rank-a: #a78bfa;
+    --rank-b: #6d28d9;
+    --rank-c: #c4b5fd;
+    --rank-text: #6d28d9;
+}
+.rank-tone-crimson {
+    --rank-a: #fb7185;
+    --rank-b: #be123c;
+    --rank-c: #fda4af;
+    --rank-text: #be123c;
+}
+.rank-tone-gold {
+    --rank-a: #f3cd78;
+    --rank-b: #b07a12;
+    --rank-c: #fde68a;
+    --rank-text: #8a5d00;
+}
+.rank-tone-radiant {
+    --rank-a: #fde68a;
+    --rank-b: #e8b64c;
+    --rank-c: #ffffff;
+    --rank-text: #8a5d00;
+}
+.rank-tone-prismatic {
+    --rank-a: #6cbcff;
+    --rank-b: #f472b6;
+    --rank-c: #fde68a;
+    --rank-text: #6d28d9;
+}
+
+/* Brighter letters on dark surfaces */
+.dark .rank-tone-iron {
+    --rank-text: #d3dae8;
+}
+.dark .rank-tone-jade {
+    --rank-text: #6ee7b7;
+}
+.dark .rank-tone-tide {
+    --rank-text: #67e8f9;
+}
+.dark .rank-tone-azure {
+    --rank-text: #93c5fd;
+}
+.dark .rank-tone-violet {
+    --rank-text: #c4b5fd;
+}
+.dark .rank-tone-crimson {
+    --rank-text: #fda4af;
+}
+.dark .rank-tone-gold,
+.dark .rank-tone-radiant {
+    --rank-text: #fde68a;
+}
+.dark .rank-tone-prismatic {
+    --rank-text: #ffffff;
+}
+
+@layer components {
+    .rank-emblem {
+        @apply overflow-visible;
+    }
+
+    .rank-emblem-glow {
+        filter: drop-shadow(0 0 10px var(--rank-a));
+    }
+
+    .rank-tag {
+        @apply border-transparent font-bold;
+        color: var(--rank-text);
+        background-color: color-mix(in srgb, var(--rank-a) 16%, transparent);
+    }
+}

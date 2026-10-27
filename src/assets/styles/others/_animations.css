@@ -1,0 +1,52 @@
+/* Motion is decoration: everything here runs only when the user hasn't asked for reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+    .animate-glow-pulse {
+        animation: glow-pulse 2.4s ease-in-out infinite;
+    }
+
+    .animate-rise-in {
+        animation: rise-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .rank-emblem-glow {
+        animation: emblem-glow 2.8s ease-in-out infinite;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xp-bar-fill {
+        transition: none;
+    }
+}
+
+@keyframes glow-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 var(--glow);
+    }
+    50% {
+        box-shadow: 0 0 18px 2px var(--glow);
+    }
+}
+
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes emblem-glow {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 6px var(--rank-a));
+    }
+    50% {
+        filter: drop-shadow(0 0 16px var(--rank-a));
+    }
+}

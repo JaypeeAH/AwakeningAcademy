@@ -1,0 +1,305 @@
+/* "System window" panels, XP bars and subject themes (components/game). */
+
+@layer components {
+    .system-panel {
+        @apply relative rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    }
+
+    .dark .system-panel {
+        background-image: linear-gradient(180deg, var(--primary-subtle), transparent 140px);
+        box-shadow:
+            0 0 0 1px rgb(255 255 255 / 0.02) inset,
+            0 10px 30px -18px var(--glow-strong);
+    }
+
+    /* Glowing top edge */
+    .system-panel::before {
+        content: '';
+        @apply pointer-events-none absolute inset-x-6 top-0 h-px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        opacity: 0.7;
+    }
+
+    /* Corner marks */
+    .system-panel::after {
+        content: '';
+        @apply pointer-events-none absolute inset-2 rounded-xl;
+        background:
+            linear-gradient(var(--primary), var(--primary)) top left / 10px 1px no-repeat,
+            linear-gradient(var(--primary), var(--primary)) top left / 1px 10px no-repeat,
+            linear-gradient(var(--primary), var(--primary)) bottom right / 10px 1px no-repeat,
+            linear-gradient(var(--primary), var(--primary)) bottom right / 1px 10px no-repeat;
+        opacity: 0.45;
+    }
+
+    .system-panel-gold::before {
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .system-panel-gold::after {
+        background:
+            linear-gradient(var(--gold), var(--gold)) top left / 10px 1px no-repeat,
+            linear-gradient(var(--gold), var(--gold)) top left / 1px 10px no-repeat,
+            linear-gradient(var(--gold), var(--gold)) bottom right / 10px 1px no-repeat,
+            linear-gradient(var(--gold), var(--gold)) bottom right / 1px 10px no-repeat;
+    }
+
+    .system-eyebrow {
+        @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-primary;
+    }
+
+    /* ── XP bar ── */
+    .xp-bar {
+        @apply relative w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700;
+    }
+
+    .xp-bar-fill {
+        @apply h-full rounded-full bg-primary;
+        background-image: linear-gradient(90deg, var(--primary-deep), var(--primary), var(--primary-mild));
+        box-shadow: 0 0 12px var(--glow-strong);
+        transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .xp-bar-fill-gold {
+        background-image: linear-gradient(90deg, var(--gold), var(--gold-mild));
+        box-shadow: 0 0 12px var(--gold-subtle);
+    }
+
+    /* ── Subjects ── */
+    .subject-tag {
+        @apply border-transparent;
+        color: var(--subject);
+        background-color: var(--subject-subtle);
+    }
+
+    .subject-icon {
+        @apply flex items-center justify-center rounded-xl;
+        color: var(--subject);
+        background-color: var(--subject-subtle);
+    }
+
+    .subject-accent {
+        border-color: var(--subject);
+    }
+
+    .subject-bar .xp-bar-fill {
+        background-image: none;
+        background-color: var(--subject);
+        box-shadow: none;
+    }
+
+    /* ── Reward dialog ── */
+    .reward-dialog {
+        @apply relative;
+    }
+
+    .dark .reward-dialog::before {
+        content: '';
+        @apply pointer-events-none absolute -inset-6 -z-10;
+        background: radial-gradient(circle at 50% 20%, var(--primary-subtle), transparent 65%);
+    }
+}
+
+/* Subject themes: one hue each, tuned for both modes (no hex in components — these are the tokens) */
+.subject-theme-arcane {
+    --subject: #6d5df5;
+    --subject-subtle: rgb(109 93 245 / 0.12);
+}
+.subject-theme-verdant {
+    --subject: #13895a;
+    --subject-subtle: rgb(19 137 90 / 0.12);
+}
+.subject-theme-ember {
+    --subject: #c2410c;
+    --subject-subtle: rgb(194 65 12 / 0.12);
+}
+.subject-theme-amber {
+    --subject: #a16207;
+    --subject-subtle: rgb(161 98 7 / 0.12);
+}
+.subject-theme-storm {
+    --subject: #0e7490;
+    --subject-subtle: rgb(14 116 144 / 0.12);
+}
+.subject-theme-rose {
+    --subject: #be185d;
+    --subject-subtle: rgb(190 24 93 / 0.12);
+}
+.subject-theme-tide {
+    --subject: #1d64d8;
+    --subject-subtle: rgb(29 100 216 / 0.12);
+}
+.subject-theme-vigor {
+    --subject: #b91c1c;
+    --subject-subtle: rgb(185 28 28 / 0.12);
+}
+
+.dark .subject-theme-arcane,
+.dark.subject-theme-arcane {
+    --subject: #a597ff;
+    --subject-subtle: rgb(165 151 255 / 0.14);
+}
+.dark .subject-theme-verdant {
+    --subject: #4ade80;
+    --subject-subtle: rgb(74 222 128 / 0.14);
+}
+.dark .subject-theme-ember {
+    --subject: #fb923c;
+    --subject-subtle: rgb(251 146 60 / 0.14);
+}
+.dark .subject-theme-amber {
+    --subject: #facc15;
+    --subject-subtle: rgb(250 204 21 / 0.14);
+}
+.dark .subject-theme-storm {
+    --subject: #22d3ee;
+    --subject-subtle: rgb(34 211 238 / 0.14);
+}
+.dark .subject-theme-rose {
+    --subject: #f472b6;
+    --subject-subtle: rgb(244 114 182 / 0.14);
+}
+.dark .subject-theme-tide {
+    --subject: #60a5fa;
+    --subject-subtle: rgb(96 165 250 / 0.14);
+}
+.dark .subject-theme-vigor {
+    --subject: #f87171;
+    --subject-subtle: rgb(248 113 113 / 0.14);
+}
+
+/* ── Secret markers (hidden objects in lessons) ─────────────────────────────────────────────────── */
+
+.secret-marker {
+    @apply inline-flex cursor-pointer items-center rounded px-0.5 align-baseline text-gold/40 transition-colors;
+    @apply hover:text-gold focus-visible:text-gold focus-visible:outline-2 focus-visible:outline-gold;
+    animation: secret-glint 4s ease-in-out infinite;
+}
+
+.secret-marker-found {
+    @apply text-gold;
+    animation: none;
+}
+
+@keyframes secret-glint {
+    0%,
+    85%,
+    100% {
+        opacity: 0.45;
+    }
+    92% {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .secret-marker {
+        animation: none;
+    }
+}
+
+/* ── Lesson content extras (MarkdownContent) ────────────────────────────────────────────────────── */
+
+.lesson-content figure {
+    @apply my-6;
+}
+
+.lesson-content figure img {
+    @apply mx-auto my-0;
+}
+
+.lesson-content figcaption {
+    @apply mt-2 text-center text-sm text-gray-500 dark:text-gray-400;
+}
+
+.lesson-content img {
+    @apply h-auto max-w-full;
+}
+
+.callout {
+    @apply my-5 rounded-xl border-l-4 px-4 py-3;
+}
+
+.callout > :last-child {
+    @apply mb-0;
+}
+
+.callout > :nth-child(2) {
+    @apply mt-0;
+}
+
+.callout-title {
+    @apply mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em];
+}
+
+.callout-note {
+    @apply border-info bg-info-subtle;
+}
+
+.callout-note .callout-title {
+    @apply text-info;
+}
+
+.callout-tip {
+    @apply border-success bg-success-subtle;
+}
+
+.callout-tip .callout-title {
+    @apply text-success;
+}
+
+.callout-important {
+    @apply border-primary bg-primary-subtle;
+}
+
+.callout-important .callout-title {
+    @apply text-primary;
+}
+
+.callout-warning {
+    @apply border-warning bg-warning-subtle;
+}
+
+.callout-warning .callout-title {
+    @apply text-warning;
+}
+
+.video-facade {
+    background:
+        radial-gradient(circle at 50% 40%, var(--primary-subtle), transparent 60%),
+        linear-gradient(135deg, #0b1220, #111827);
+}
+
+.secret-chip {
+    @apply mx-0.5 inline-flex items-center rounded-md border border-dashed border-gold px-1.5 text-xs font-semibold text-gold;
+}
+
+/* ── Visual lesson editor (TipTap) ──────────────────────────────────────────────────────────────── */
+
+.lesson-editor {
+    @apply outline-none;
+}
+
+.lesson-editor p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none float-left h-0 text-gray-400 dark:text-gray-500;
+}
+
+.lesson-editor table td,
+.lesson-editor table th {
+    @apply relative border border-gray-200 px-3 py-2 align-top dark:border-gray-700;
+}
+
+.lesson-editor table .selectedCell::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 bg-primary-subtle;
+}
+
+.lesson-editor table p {
+    @apply my-0;
+}
+
+.lesson-editor .ProseMirror-selectednode {
+    @apply rounded-lg ring-2 ring-primary;
+}
