@@ -60,8 +60,12 @@ export class DataTooLargeError extends AppError {
 
 /** 429 */
 export class TooManyRequestsError extends AppError {
-    constructor(message = 'Too many attempts — please wait a moment and try again.', code = 'RATE_LIMITED') {
-        super(message, 429, code)
+    constructor(
+        message = 'Too many attempts — please wait a moment and try again.',
+        code = 'RATE_LIMITED',
+        extra?: { retryAfter?: number },
+    ) {
+        super(message, 429, code, extra)
     }
 }
 

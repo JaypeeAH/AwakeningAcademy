@@ -34,6 +34,8 @@ export const toFormData = ({ activity, questions }: ActivityEditorData): Activit
         prompt: q.prompt,
         points: q.points,
         phase: q.phase ?? 1,
+        objective: q.objective ?? '',
+        aiDraft: q.aiDraft ?? false,
         options: q.options.map((o) => ({ id: o.id, label: o.label })),
         key: {
             correctOptionIds: q.key.correctOptionIds,
@@ -67,6 +69,8 @@ export const questionInputToForm = (q: QuestionInput): QuestionFormData => ({
     prompt: q.prompt,
     points: q.points,
     phase: q.phase ?? 1,
+    objective: q.objective ?? '',
+    aiDraft: q.aiDraft ?? false,
     options: q.options.map((o) => ({ id: o.id, label: o.label })),
     key: {
         correctOptionIds: q.key.correctOptionIds,
@@ -112,6 +116,8 @@ export function newQuestion(kind: QuestionKind): QuestionFormData {
         prompt: '',
         points: 1,
         phase: 1,
+        objective: '',
+        aiDraft: false,
         key: { correctOptionIds: [], acceptedAnswers: [], caseSensitive: false, explanation: '', rubric: '' },
     }
     switch (kind) {

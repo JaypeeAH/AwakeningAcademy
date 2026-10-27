@@ -66,6 +66,14 @@ export function getPublishIssues(input: {
     if (isAssessment(input.kind)) {
         if (input.questions.length === 0) issues.push({ target: 'questions', message: 'Add at least one question.' })
         input.questions.forEach((q, i) => issues.push(...getQuestionIssues(q, i)))
+        input.questions.forEach((q, i) => {
+            if (q.aiDraft) {
+                issues.push({
+                    target: q.id,
+                    message: `Question ${i + 1} is an AI draft — check it and mark it reviewed.`,
+                })
+            }
+        })
     }
     if (input.kind === 'boss_battle') {
         issues.push(...getBossIssues(input.boss, input.questions).map((message) => ({ target: 'boss', message })))

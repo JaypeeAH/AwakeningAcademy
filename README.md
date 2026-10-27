@@ -10,7 +10,7 @@ the rules.
 Conventions live in [`.agent/follow-existing-codebase`](.agent/follow-existing-codebase/SKILL.md). Teachers: see the
 [teacher guide](docs/TEACHER_GUIDE.md).
 
-## What works (Phases 1–4)
+## What works (Phases 1–5)
 
 | Area | Features |
 |---|---|
@@ -22,9 +22,11 @@ Conventions live in [`.agent/follow-existing-codebase`](.agent/follow-existing-c
 | Secrets & skills (Phase 3) | Teacher Easter egg editor (hidden objects and sections in lessons, secret phrases, quest sequences, score and streak milestones, item sets, cross-course and class-wide goals; clue, lore, rarity, XP and item rewards) · student Codex with ??? silhouettes · Easter Bunny skips (confirmed, never on exams, recorded as skipped) · seven skills unlocked by level, rank and discoveries (Insight, Knowledge Echo, Time Dilation, Second Chance, Overdrive, Dungeon Sense, Guild Leader) · Inventory & Skills page · admin item and skill tuning |
 | Challenges & social (Phase 4) | Boss battles in phases with a post-hand-in HP bar · learning streaks with milestone XP and a Second Chance streak shield · data-driven achievements (admin-managed, hidden ones) · guilds per course (teacher-formed, join requests, student-founded with Guild Leader) · team quests rewarding every member · weekly course leaderboards (off / initials / names, students can hide) |
 | Lesson editor | Formatting toolbar and shortcuts · image upload (private, byte-checked), course image library, image links, paste/drop · YouTube/Vimeo videos (click-to-play, privacy-enhanced) · callouts · tables · full-screen side-by-side preview · reading time |
+| AI, analytics & hardening (Phase 5) | AI question drafts (provider-independent; Claude when `ANTHROPIC_API_KEY` is set) that need teacher review before publishing · learning objectives on questions · teacher analytics (score distribution, objectives, most-missed questions, overdue work, retries; skips and bonus XP apart) · database-backed rate limits on sign-in, emails, hand-ins, secret phrases and AI · Content-Security-Policy and HSTS · error reporting with references and optional webhook alerts · personal data download and account deletion · Playwright tests for the 15 acceptance workflows |
+| Help & samples | Help Center (`/help`) with articles, FAQs and search, filtered on the server by role (student / teacher / admin) · four sample courses (Mathematics, Biology, Solar System, Ancient Egypt) teachers add from **Courses → Add a sample course**, with lessons, credited Wikimedia/NASA images, YouTube videos and quizzes |
 | Engine | Server-side XP ledger with idempotency keys · atomic, concurrency-safe SQL functions · RLS on every table · answer keys and rubrics never sent to students early |
 
-The remaining phases are planned in [docs/ROADMAP.md](docs/ROADMAP.md).
+Running it in production (environment variables, rate limits, privacy requests, monitoring, backups): [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 ## Set up
 
@@ -68,6 +70,9 @@ the production `/auth/confirm` URL to Supabase's redirect list. No other service
 | `npm test` | Vitest: pure game logic plus SQL and RLS tests (runs every migration in PGlite, an in-process Postgres) |
 | `npm run typecheck` / `lint` / `format:check` | Quality gates |
 | `npm run db:types` | Regenerates `src/@types/supabase/database.types.ts` from the migrations |
+| `npm run test:e2e` | Playwright: the 15 acceptance workflows against a running app (creates and removes `zz-e2e` accounts) |
+| `npm run db:sample-seed` | Regenerates `supabase/seeds/sample_courses.sql` (the four sample courses as SQL, to run in the Supabase SQL editor; join codes `SMPMATH1`, `SMPBIO1`, `SMPSPACE1`, `SMPEGYPT1`) |
+| `ALLOW_DEMO_SEED=true npm run seed:demo -- --yes` | Dev only: a demo course with 12 students for Analytics (`-- --clean` removes it) |
 
 ## How rewards stay fair
 

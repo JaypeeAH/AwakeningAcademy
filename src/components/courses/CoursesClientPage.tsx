@@ -12,7 +12,8 @@ import XpBar from '@/components/game/XpBar'
 import { PublishStatusTag, SubjectTag } from '@/components/game/GameTags'
 import JoinCourseDialog from './dialogs/JoinCourseDialog'
 import CreateCourseDialog from './dialogs/CreateCourseDialog'
-import navigationIcon, { AddIcon, StudentsIcon } from '@/configs/icons.config'
+import SampleCoursesDialog from './dialogs/SampleCoursesDialog'
+import navigationIcon, { AddIcon, SparkleIcon, StudentsIcon } from '@/configs/icons.config'
 import { getCoursePath } from '@/configs/app.config'
 import { useCoursesStore } from '@/stores/GameStores'
 import useSession from '@/utils/hooks/useSession'
@@ -72,12 +73,18 @@ export default function CoursesClientPage() {
     const sharedCode = useSearchParams().get('join')?.toUpperCase() ?? ''
     const [joinOpen, setJoinOpen] = useState(!!sharedCode)
     const [createOpen, setCreateOpen] = useState(false)
+    const [samplesOpen, setSamplesOpen] = useState(false)
     const manages = can('courses.manage')
 
     const action = manages ? (
-        <Button variant="solid" icon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-            New course
-        </Button>
+        <div className="flex flex-wrap gap-2">
+            <Button icon={<SparkleIcon />} onClick={() => setSamplesOpen(true)}>
+                Add a sample course
+            </Button>
+            <Button variant="solid" icon={<AddIcon />} onClick={() => setCreateOpen(true)}>
+                New course
+            </Button>
+        </div>
     ) : (
         <Button variant="solid" icon={<AddIcon />} onClick={() => setJoinOpen(true)}>
             Join a course
@@ -108,7 +115,7 @@ export default function CoursesClientPage() {
                     title={manages ? 'No courses yet' : 'You haven’t joined a course'}
                     description={
                         manages
-                            ? 'Create your first course, add a lesson, then share the join code with your class.'
+                            ? 'Create your first course, or add a ready-made sample to see lessons, videos and quizzes in action.'
                             : 'Your teacher will give you a join code. Enter it to see the course’s quests.'
                     }
                     action={action}
@@ -121,7 +128,10 @@ export default function CoursesClientPage() {
                 </div>
             )}
             {manages ? (
-                <CreateCourseDialog isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+                <>
+                    <CreateCourseDialog isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+                    <SampleCoursesDialog isOpen={samplesOpen} onClose={() => setSamplesOpen(false)} />
+                </>
             ) : (
                 <JoinCourseDialog isOpen={joinOpen} onClose={() => setJoinOpen(false)} initialCode={sharedCode} />
             )}

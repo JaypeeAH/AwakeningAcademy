@@ -17,9 +17,11 @@ import UserAvatar from '@/components/shared/UserAvatar'
 import { LevelBadge, RankTag } from '@/components/game/GameTags'
 import ChangeRoleDialog from './ChangeRoleDialog'
 import AdjustXpDialog from './AdjustXpDialog'
-import { SearchIcon, StudentsIcon, XpIcon } from '@/configs/icons.config'
+import DeleteAccountDialog from './DeleteAccountDialog'
+import { DeleteIcon, FileIcon, SearchIcon, StudentsIcon, XpIcon } from '@/configs/icons.config'
 import { homePath } from '@/configs/app.config'
 import { useUsersStore } from '@/stores/AdminStores'
+import { getUserExportUrl } from '@/services/users'
 import { ROLES, roleLabel, type Role } from '@/@types/auth/Roles'
 import useSession from '@/utils/hooks/useSession'
 import useDebouncedValue from '@/utils/hooks/useDebouncedValue'
@@ -82,6 +84,7 @@ export default function UsersClientPage() {
 
     const [roleChange, setRoleChange] = useState<{ user: UserAccount; role: Role } | null>(null)
     const [adjusting, setAdjusting] = useState<UserAccount | null>(null)
+    const [deleting, setDeleting] = useState<UserAccount | null>(null)
 
     const records = data?.records ?? []
     const filtered = !!query.q || !!query.role
@@ -227,15 +230,38 @@ export default function UsersClientPage() {
                                                         {formatDate(account.createdAt)}
                                                     </Td>
                                                     <Td className="text-right">
-                                                        {account.role === 'student' && (
-                                                            <Button
-                                                                size="xs"
-                                                                icon={<XpIcon />}
-                                                                onClick={() => setAdjusting(account)}
-                                                            >
-                                                                Adjust XP
-                                                            </Button>
-                                                        )}
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            {account.role === 'student' && (
+                                                                <Button
+                                                                    size="xs"
+                                                                    icon={<XpIcon />}
+                                                                    onClick={() => setAdjusting(account)}
+                                                                >
+                                                                    Adjust XP
+                                                                </Button>
+                                                            )}
+                                                            <Tooltip title="Download everything stored about this person (JSON)">
+                                                                <a
+                                                                    href={getUserExportUrl(account.id)}
+                                                                    download
+                                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-700"
+                                                                    aria-label={`Download ${account.displayName}’s data`}
+                                                                >
+                                                                    <FileIcon aria-hidden />
+                                                                </a>
+                                                            </Tooltip>
+                                                            {!isMe && (
+                                                                <Tooltip title="Delete account (privacy request)">
+                                                                    <Button
+                                                                        size="xs"
+                                                                        variant="plain"
+                                                                        icon={<DeleteIcon />}
+                                                                        aria-label={`Delete ${account.displayName}’s account`}
+                                                                        onClick={() => setDeleting(account)}
+                                                                    />
+                                                                </Tooltip>
+                                                            )}
+                                                        </div>
                                                     </Td>
                                                 </Tr>
                                             )
@@ -266,6 +292,14 @@ export default function UsersClientPage() {
                 onClose={() => setRoleChange(null)}
             />
             {adjusting && <AdjustXpDialog key={adjusting.id} student={adjusting} onClose={() => setAdjusting(null)} />}
+            <DeleteAccountDialog
+                user={deleting}
+                onClose={() => setDeleting(null)}
+                onDeleted={() => {
+                    setDeleting(null)
+                    void refresh()
+                }}
+            />
         </>
     )
 }

@@ -1,4 +1,5 @@
 import classNames from 'classnames'
+import { cloneElement, isValidElement } from 'react'
 import { TbChevronDown, TbChevronUp, TbChevronRight, TbChevronLeft } from 'react-icons/tb'
 import type { CommonProps } from '../@types/common'
 import type { Placement } from '@floating-ui/react'
@@ -13,7 +14,7 @@ export interface DropdownToggleSharedProps {
 
 interface DropdownToggleProps extends CommonProps, DropdownToggleSharedProps {
     id?: string
-    ref?: Ref<HTMLDivElement>
+    ref?: Ref<HTMLElement>
 }
 
 const DropdownToggleDefaultContent = ({
@@ -77,6 +78,16 @@ const DropdownToggle = (props: DropdownToggleProps & HTMLProps<HTMLDivElement>) 
 
     const dropdownToggleDefaultClass = classNames(dropdownToggleClass, 'dropdown-toggle-default')
 
+    // A custom trigger (a Button) is the control itself: it gets the menu props (aria-expanded, handlers,
+    // the anchor ref) so screen readers meet one button instead of a widget wrapped around another
+    if (isValidElement<HTMLProps<HTMLElement>>(renderTitle)) {
+        return (
+            <div className={dropdownToggleClass}>
+                {cloneElement(renderTitle, { ...rest, ref } as HTMLProps<HTMLElement>)}
+            </div>
+        )
+    }
+
     if (renderTitle) {
         return (
             <div className={dropdownToggleClass} {...rest} ref={ref}>
@@ -86,7 +97,7 @@ const DropdownToggle = (props: DropdownToggleProps & HTMLProps<HTMLDivElement>) 
     }
 
     return (
-        <div ref={ref} className={dropdownToggleDefaultClass} {...rest}>
+        <div ref={ref} className={dropdownToggleDefaultClass} role="button" tabIndex={disabled ? -1 : 0} {...rest}>
             <span className="flex items-center gap-1">
                 <DropdownToggleDefaultContent placement={placement}>{children}</DropdownToggleDefaultContent>
             </span>

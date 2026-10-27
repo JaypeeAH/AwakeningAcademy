@@ -18,7 +18,14 @@ export interface Question {
     position: number
     /** Boss battles: which phase the question belongs to (1-based; 1 when absent) */
     phase?: number
+    /** The learning objective it checks (one of the activity's objectives; '' = not tagged) */
+    objective?: string
     options: QuestionOption[]
+}
+
+/** Teacher-side: drafted by AI and not yet reviewed (publishing waits until it is) */
+export interface QuestionDraftFlag {
+    aiDraft?: boolean
 }
 
 export interface QuestionKey {
@@ -31,7 +38,7 @@ export interface QuestionKey {
 }
 
 /** Teacher/editor and grading shape */
-export interface KeyedQuestion extends Question {
+export interface KeyedQuestion extends Question, QuestionDraftFlag {
     key: QuestionKey
 }
 

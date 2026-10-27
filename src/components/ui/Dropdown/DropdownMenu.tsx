@@ -242,7 +242,6 @@ const DropdownMenu = (props: DropdownMenuProps & HTMLProps<HTMLElement>) => {
             {!isNested ? (
                 <DropdownToggle
                     ref={toggleRef}
-                    role={'menuitem'}
                     data-open={isOpen ? '' : undefined}
                     data-focus-inside={hasFocusInside ? '' : undefined}
                     className={classNames(toggleClassName)}

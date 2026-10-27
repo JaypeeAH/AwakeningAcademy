@@ -14,6 +14,25 @@ Bunny. No coding is needed for any of it.
    already have an account join straight away. You can also share the **join code**, or add students
    by email on the **Roster** tab.
 
+### Sample courses
+
+To see a finished course before building your own, go to **Courses → Add a sample course**. Pick a
+sample, and it's added to your courses with lessons, images, videos and a quiz:
+
+| Sample | Subject | Inside |
+|---|---|---|
+| Right Triangles & Pythagoras | Mathematics | 2 lessons, a quiz and a boss battle |
+| Cells & Photosynthesis | Science | 2 lessons and a quiz |
+| Our Solar System | Science | 2 lessons and a quiz |
+| Ancient Egypt | History & Society | 2 lessons and a quiz |
+
+- **It's your own copy.** It arrives published, with its own join code. Edit, unpublish or archive
+  anything in it. Adding the same sample again makes a separate copy.
+- **To try it as a student,** share the join code with a test student account, or with your class.
+- **Pictures** come from Wikimedia Commons and NASA. They are openly licensed, and each caption credits
+  its author and licence; keep the credit if you reuse a picture.
+- **Videos** are YouTube links. They only load after a student presses play.
+
 ## 2. Add lessons and activities (the Quest Builder)
 
 On the **Content** tab choose **New activity** and pick a kind:
@@ -78,6 +97,20 @@ The lesson editor works like a word processor: what you see is what students get
       views edit the same lesson.
 - **Reading time:** shown under the editor.
 
+### Learning objectives and AI drafts
+
+- **Objectives on questions.** Add the activity's learning objectives in **Details**. Each question can
+  then be linked to the objective it checks. **Analytics** uses these links to show which objectives
+  your class has mastered and which need more work.
+- **Draft with AI** (when your administrator has switched it on): in an assessment's questions, choose
+  **Draft with AI**.
+    1. Pick one of the course's lessons, or paste text.
+    2. Choose how many questions, which types, a difficulty and the objectives to cover.
+    3. The drafts are added to the activity, marked **AI draft**. Check each one's question, answers
+       and explanation, then choose **Mark as reviewed**.
+    4. Nothing is saved until you save, and the activity can't be published while any draft is
+       unreviewed. The AI only sees the text you give it, never student information.
+
 The **checklist** on the right lists anything a student would trip over. **Publish** stays locked until
 the checklist is clear. **Student preview** shows exactly what students will see.
 
@@ -91,6 +124,17 @@ the checklist is clear. **Student preview** shows exactly what students will see
   hardest. Skipped answers are counted separately and never as correct.
 - The course **Progress** tab is a gradebook. It flags students who may need support, based on scores
   and overdue work, not XP.
+- **Analytics** (side menu) goes deeper for one course. You can filter it by module, by student and by
+  date. Learning comes first:
+    - the spread of scores
+    - performance by learning objective, weakest first
+    - the questions most often answered wrong
+    - overdue and unfinished work, with names
+    - retries
+
+  Engagement comes last and is kept separate:
+    - questions skipped with the Easter Bunny
+    - XP from finishing work, compared with bonus XP
 
 ## 4. Secrets, skills and the Easter Bunny
 

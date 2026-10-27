@@ -135,6 +135,13 @@ the UI hides actions with `useSession().can(permission)` (presentation only).
     presses play. Never render raw HTML or iframes from lesson content.
 16. **Lessons are stored as Markdown.** The visual editor (TipTap) only offers what `utils/lessonDoc.ts` can
     round-trip; add a node there (both directions + a test) before offering it in the editor.
+17. **AI is a drafting aid, never an authority.** Providers implement `QuestionDraftProvider` (server-only,
+    keys in env); model output is validated and normalised (`utils/aiDrafts.ts`), flagged `aiDraft`, and
+    can't be published until a teacher reviews it. Send only the lesson/pasted text — never student data.
+    Rate-limit and log every request.
+18. **Abuse-prone routes are rate-limited** with `enforceRateLimit` (database-backed, hashed keys,
+    fail-open). Unexpected errors go through `reportError` (reference code, no personal data). New outside
+    origins must be added to the CSP in `next.config.ts`.
 
 ---
 

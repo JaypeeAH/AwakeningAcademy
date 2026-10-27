@@ -54,6 +54,7 @@ export default function AchievementCard({ achievement }: { achievement: PlayerAc
                         size="sm"
                         value={achievement.progress.current}
                         max={Math.max(achievement.progress.target, 1)}
+                        ariaLabel={`${achievement.name} progress`}
                         valueText={`${achievement.progress.current.toLocaleString()} / ${achievement.progress.target.toLocaleString()}`}
                     />
                 )

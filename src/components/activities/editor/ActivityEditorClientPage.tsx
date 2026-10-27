@@ -321,6 +321,10 @@ function ActivityEditor({ data }: { data: ActivityEditorData }) {
                                 {assessment && (
                                     <QuestionListEditor
                                         courseId={course.id}
+                                        activityId={activityId}
+                                        lessons={data.siblings
+                                            .filter((a) => a.kind === 'lesson')
+                                            .map((a) => ({ id: a.id, title: a.title }))}
                                         attemptCount={data.attemptCount}
                                         issues={issues}
                                         phases={boss ? (values.boss?.phases ?? []) : undefined}

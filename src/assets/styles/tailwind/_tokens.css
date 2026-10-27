@@ -35,7 +35,8 @@
     --gray-200: #d3dae8;
     --gray-300: #b3bed3;
     --gray-400: #8a97b2;
-    --gray-500: #67758f;
+    /* 500 is the muted-text shade: ≥ 4.5:1 on white, gray-50 and gray-100 (WCAG AA); lighter in .dark */
+    --gray-500: #5f6c86;
     --gray-600: #4a5670;
     --gray-700: #263149;
     --gray-800: #121a2e;
@@ -57,6 +58,9 @@
     --gold: #e8b64c;
     --gold-mild: #f3cd78;
     --gold-subtle: rgb(232 182 76 / 0.14);
+
+    /* Muted text on dark surfaces: ≥ 4.5:1 on gray-800, gray-900 and the page background */
+    --gray-500: #7d8aa5;
 
     --error: #ff5d6c;
     --error-subtle: rgb(255 93 108 / 0.14);

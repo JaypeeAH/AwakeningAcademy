@@ -26,6 +26,9 @@ export const QuestionInputSchema = z.object({
     points: z.number().int().min(1).max(100).default(1),
     /** Boss battles only (1 when absent) */
     phase: z.number().int().min(1).max(5).optional(),
+    objective: z.string().trim().max(300).optional(),
+    /** Drafted by AI and not yet reviewed; publishing is blocked while any remain */
+    aiDraft: z.boolean().optional(),
     options: z
         .array(z.object({ id: z.string().uuid(), label: z.string().trim().min(1, 'Options can’t be empty').max(1000) }))
         .max(12)

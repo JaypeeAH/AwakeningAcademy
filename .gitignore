@@ -20,3 +20,7 @@ supabase/.branches
 .DS_Store
 *.log
 coverage
+
+# playwright
+playwright-report/
+test-results/

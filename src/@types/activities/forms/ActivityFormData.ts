@@ -16,6 +16,9 @@ export const QuestionFormSchema = z.object({
     prompt: z.string().trim().min(1, 'Write the question').max(5000),
     points: z.number({ invalid_type_error: 'Enter a number' }).int().min(1, 'At least 1').max(100, 'At most 100'),
     phase: z.number().int().min(1).max(5),
+    objective: z.string().max(300),
+    /** Drafted by AI, not yet reviewed (the builder shows a banner; publishing waits) */
+    aiDraft: z.boolean(),
     options: z
         .array(z.object({ id: z.string().uuid(), label: z.string().trim().min(1, 'Options can’t be empty').max(1000) }))
         .max(12, 'At most 12 options'),

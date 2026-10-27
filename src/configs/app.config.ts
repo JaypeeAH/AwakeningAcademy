@@ -31,6 +31,11 @@ export const inventoryPath = '/inventory'
 export const codexPath = '/codex'
 export const achievementsPath = '/achievements'
 
+/** The Help Center: articles and FAQs for the signed-in role */
+export const helpPath = '/help'
+export const getHelpArticlePath = (slug: string) => `${helpPath}/${encodeURIComponent(slug)}`
+export const getHelpTopicPath = (topicKey: string) => `${helpPath}?topic=${encodeURIComponent(topicKey)}`
+
 export type CourseTab = 'content' | 'roster' | 'progress' | 'bank' | 'secrets' | 'guilds' | 'leaderboard'
 
 export const getCoursePath = (courseId: string, tab?: CourseTab) =>
@@ -48,6 +53,8 @@ export const getLearnPath = (activityId: string, attemptId?: string) =>
 
 /** Teachers' marking: the queue, and one attempt in the grader */
 export const gradingPath = '/grading'
+export const analyticsPath = '/analytics'
+export const getAnalyticsPath = (courseId: string) => `${analyticsPath}?course=${courseId}`
 export const getGradingPath = (attemptId: string) => `${gradingPath}/${attemptId}`
 
 // ── Admin ──

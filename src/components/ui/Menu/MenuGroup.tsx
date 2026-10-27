@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext } from 'react'
+import { Children, useContext } from 'react'
 import classNames from 'classnames'
 import { GroupContextProvider } from './context/groupContext'
 import MenuContext from './context/menuContext'
@@ -23,7 +23,11 @@ const MenuGroup = (props: MenuGroupProps) => {
         <div className={menuGroupClass}>
             {label && !sideCollapsed && <div className={classNames('menu-title')}>{label}</div>}
             <GroupContextProvider value={null}>
-                <ul>{children}</ul>
+                <ul>
+                    {Children.map(children, (child) => (
+                        <li>{child}</li>
+                    ))}
+                </ul>
             </GroupContextProvider>
         </div>
     )

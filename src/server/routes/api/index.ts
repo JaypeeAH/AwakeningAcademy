@@ -41,7 +41,7 @@ export const apiHandler =
             assertSameOrigin(req)
             return await handler(req, ctx)
         } catch (error) {
-            return getApiErrorResponse(error)
+            return getApiErrorResponse(error, req.nextUrl.pathname)
         }
     }
 

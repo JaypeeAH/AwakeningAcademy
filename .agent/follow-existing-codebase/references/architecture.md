@@ -67,6 +67,7 @@ app/(portal)/x/page.tsx (server comp.) ────────► server/action
 | `20261029000100_lesson_media.sql` | Private `lesson-media` bucket (images only, 5 MB) + `course_media` |
 | `20261030000100_phase4_enums.sql` | `xp_source` values `achievement`, `team_quest` |
 | `20261030000200_social_challenges.sql` | Settings `timezone` / `streak_milestones`; `courses.leaderboard_mode` / `student_guilds`; `profiles.leaderboard_hidden`; `questions.phase`; `activities.boss` / `team_config`; `learning_days`; achievements; guilds; team quest completions; leaderboard functions; `save_activity_content` (phases) |
+| `20261031000100_ai_analytics_hardening.sql` | `questions.objective` / `ai_draft`; `ai_draft_requests` (AI usage log); `rate_limit_hits` + `hit_rate_limit`; `save_activity_content` (objective, AI-draft flag) |
 | `…0200_skills_inventory_secrets.sql` | Items + inventory ledger, skills + usages, Easter eggs + discoveries, `allow_skills` / `allow_bunny_skips`, `attempts.skipped_question_ids`, Second Chance allowances; `start_attempt` / `grade_attempt` replaced |
 
 ### Tables
@@ -86,7 +87,7 @@ app/(portal)/x/page.tsx (server comp.) ────────► server/action
 | Secrets | `easter_eggs` (course, trigger + zod-validated `config`, clue / `clue_visible`, reveal lore, `phrase_hash`, `marker_key`, rarity, `rewards`, active — teachers only), `egg_discoveries` (one per student+egg) |
 | Media | `course_media` (teacher-uploaded lesson images; served through `/api/media/[id]`) |
 | Social | `learning_days` (one per student per local day; `shielded`), `achievement_definitions` (condition JSON), `student_achievements`, `guilds` (course, emblem, open, status active/pending, max members), `guild_members` (one per student per course; role, status), `team_quest_completions` |
-| Ops | `notifications`, `audit_events` |
+| Ops | `notifications`, `audit_events`, `ai_draft_requests` (teacher's own / admins), `rate_limit_hits` (server only) |
 
 ### SQL functions
 
@@ -115,6 +116,7 @@ app/(portal)/x/page.tsx (server comp.) ────────► server/action
 | `unlock_skills` | service_role | Grants every skill now qualified for (level, rank, discoveries); notifies once |
 | `use_skill` | service_role | Unlocked, enabled, not passive; eligibility vs the activity; charges in the rolling window under an advisory lock; once per key; Time Dilation moves `expires_at`, Second Chance adds an allowance |
 | `start_attempt` (Phase 3) | service_role | Max attempts + Second Chance allowances |
+| `hit_rate_limit` | service_role | Fixed-window counter per key (atomic upsert); returns allowed / remaining / retryAfter |
 | `record_learning_day` | service_role | One row per student per local day (the server computes the day) |
 | `shield_streak` | service_role | Second Chance (same charges/lock as `use_skill`) fills one empty day; once per key |
 | `grant_achievement` | service_role | Once per student; XP via `apply_awards` (key `achievement:<id>:<student>`); notification; rank |
@@ -162,6 +164,9 @@ key is unique and the player row is locked.
 | `audit` | `recordAudit`, `getAuditEvents` |
 | `inventory` | `getItemDefinitions`, `getInventory`, `getBunnyCharges`, `useBunnySkip`, `createItemDefinition`, `updateItemDefinition` (code and effect fixed) |
 | `skills` | `getSkillDefinitions`, `unlockSkills`, `getSkillBook`, `useSkill` (computes each effect server-side, then `use_skill`), `getAttemptPowers` (bunny charges, skips, Insight/Echo results, usable skills), `getQuestSkills` (Overdrive / Second Chance on the briefing), `overdriveAwards`, `updateSkillDefinition` |
+| `aiDrafts` | `getAiStatus`, `draftQuestions` (teacher check → source text → rate limit → provider → `utils/aiDrafts` → log) |
+| `analytics` | `getCourseAnalytics` (course teacher; pages through >1000 rows; filters module/student/date) |
+| `privacy` | `exportPersonalData`, `exportUserData` (admin, audited), `deleteUserAccount` (storage files, then auth user → cascade) |
 | `media` | `getCourseMedia`, `prepareMediaUpload`, `confirmMediaUpload` (byte check), `getMediaViewUrl` (teacher or enrolled → 1-hour signed URL) |
 | `streaks` | `getLearningDays`, `recordLearning` (day + milestone XP), `getStreak`, `shieldStreak` |
 | `achievements` | `getPlayerStats`, `checkAchievements` (never throws), `getAchievementBook`, admin CRUD |
@@ -170,7 +175,16 @@ key is unique and the player row is locked.
 | `leaderboards` | `getCourseLeaderboard` (privacy modes, guild totals, personal best), `setLeaderboardHidden` |
 | `progression/afterLearning.ts` | `afterLearning(studentId, { learned })` → streak → team quests → secrets → achievements; used by `completeLesson`, `submitAttempt` and teacher grading (learned: false) |
 | `secrets` | `checkDiscoveries` (automatic triggers → `claim_discovery`; never throws), `claimMarker`, `speakPhrase`, `getCodex`, `getCourseSecrets`, `createSecret`, `updateSecret`, `deleteSecret` (validated against the course, items and the `secret_quest` XP rule) |
+| `help` | `getHelpCenter(user)`, `getHelpArticle(user, slug)` — content from `server/help/` filtered to the user's role by `utils/helpCenter` (`forRole`, `buildHelpCenter`, `searchHelp`), so other roles' text never reaches the browser |
+| `samples` | `getSampleCourses`, `addSampleCourse` (content in `configs/sampleCourses/`; built through `createCourse` → `createModule` → `createActivity` → `saveActivity` → `setActivityStatus`, then published; half-made course deleted on failure) |
 | `theme` | `'use server'` `getTheme` / `setTheme` (cookie) |
+
+### Other server modules
+| Path | Purpose |
+|---|---|
+| `server/ai/` | `QuestionDraftProvider` interface, `AnthropicDraftProvider` (SDK, structured outputs, refusal fallback), `getDraftProvider()` (null when unconfigured) |
+| `server/security/rateLimit.ts` | `enforceRateLimit(scope, subject)`, `LIMITS`, `ipKey`, `emailKey` (hashed), `peekRemaining` |
+| `server/observability/reportError.ts` | `reportError` — structured log line + reference code + optional `ERROR_WEBHOOK_URL`; used by `getApiErrorResponse` and `/api/client-errors` |
 
 ### API routes (`app/api/**/route.ts`)
 | Route | Methods | Permission |
@@ -213,6 +227,10 @@ key is unique and the player row is locked.
 | `courses/[courseId]/secrets`, `secrets/[eggId]` | GET, POST, PUT, DELETE | courses.manage (course teacher) |
 | `items`, `items/[itemId]` | GET (signed in), POST, PUT | progression.manage |
 | `admin/skills`, `admin/skills/[skillId]` | GET, PUT | progression.manage |
+| `activities/[activityId]/ai-drafts`, `ai/status` | POST, GET | courses.manage |
+| `courses/[courseId]/analytics` | GET | results.view (course teacher) |
+| `me/export`, `admin/users/[userId]/export`, `admin/users/[userId]` | GET, GET, DELETE | signed in / users.manage |
+| `client-errors` | POST | public (rate-limited) |
 | `courses/[courseId]/media(/prepare)`, `media/[mediaId]` | GET, POST / GET → 302 | courses.manage / teacher or enrolled |
 | `me/streak`, `me/streak/shield`, `me/achievements` | GET, POST | play |
 | `admin/achievements(/[achievementId])` | GET, POST, PUT, DELETE | progression.manage |
@@ -239,6 +257,8 @@ Plus `app/auth/confirm/route.ts` (email confirmation code exchange).
 | `timing.ts` | `isPastGrace`, `secondsRemaining`, `formatCountdown`, `ATTEMPT_GRACE_SECONDS` |
 | `questionBank.ts` | `copyBankQuestion` (fresh ids, remapped answers), `filterBankQuestions` |
 | `secrets.ts` | `evaluateTrigger` (every automatic trigger), `parseEggConfig`, `currentStreak`, `normalizePhrase`, `phraseHashInput`, `markerSnippet`, `SECRET_LINK`, `MANUAL_TRIGGERS_SET` |
+| `aiDrafts.ts` | `aiDraftToQuestion` / `aiDraftsToQuestions` (normalise + validate model output, flag `aiDraft`), `markdownToSourceText` |
+| `analytics.ts` | `scoreDistribution`, `objectivePerformance`, `missedQuestions`, `workStatus`, `retryStats`, `xpBreakdown` |
 | `media.ts` | `parseVideoUrl` (YouTube/Vimeo only → privacy-friendly embed URL), `imageMarkdown`, `videoMarkdown`, `getMediaUrl`, `readingStats`, callout types |
 | `lessonDoc.ts` | `markdownToDoc` / `docToMarkdown`: the visual editor's document ⇄ stored Markdown for every editor feature (escaping, callouts, videos, images, tables, secret markers); round-trip tested |
 | `markdownEditing.ts` | Toolbar text edits: `wrapSelection`, `prefixLines`, `insertBlock`, `insertInline` |
@@ -270,6 +290,8 @@ Phase 3 keys: secret XP `egg:<egg>:<student>` (source `secret_quest`); Overdrive
 | `progression` | `useSWRPlayerStatus`, `useSWRXpHistory`, `useSWRRankHistory`, `useSWRProgressionConfig`, `apiSaveProgressionConfig`, `apiAdjustXp`, `ensure*` |
 | `activities` | `useSWRQuests`, `useSWRActivityForPlay`, `apiCompleteLesson`, `useSWRCourseActivities`, `apiCreateActivity`, `useSWRActivityEditor`, `apiSaveActivity`, `apiSetActivityStatus`, `apiDeleteActivity`, `apiReorderActivities`, `useSWRActivityResults` |
 | `attempts` | `apiStartAttempt`, `apiSaveDraft`, `apiSubmitAttempt`, `useSWRAttemptResult`, `uploadAttemptFile` (prepare → PUT to signed URL → confirm), `apiDeleteAttemptFile`, `getFileUrl`, `useSWRMyFeedback` |
+| `ai` | `useSWRAiStatus`, `apiDraftQuestions` |
+| `analytics` | `useSWRAnalytics(courseId, filters)` |
 | `media` | `useSWRCourseMedia`, `uploadCourseImage` (prepare → PUT → confirm) |
 | `social` | `useSWRStreak`, `apiShieldStreak`, `useSWRAchievements`, admin achievements, `useSWRCourseGuilds` + guild actions, `apiUpdateCourseSocial`, `useSWRLeaderboard` |
 | `game` | `useSWRInventory`, `apiBunnySkip`, `useSWRSkillBook`, `apiUseSkill`, `useSWRCodex`, `apiClaimMarker`, `apiSpeakPhrase`, `useSWRCourseSecrets` + create/update/delete, `useSWRItemDefinitions`, `apiCreateItem`/`apiUpdateItem`, `useSWRSkillDefinitions`, `apiUpdateSkill` |
@@ -320,9 +342,11 @@ Hooks (`utils/hooks/`): `useSession`, `useTheme`, `useNavigation`, `useBreadcrum
 | `(portal)/learn/[activityId]` | Learning Dungeon (`?attempt=` re-opens a result) |
 | `(portal)/profile`, `(portal)/history` | Player profile; Chronicle |
 | `(portal)/inventory`, `(portal)/codex` | Inventory & Skills; Codex |
+| `(portal)/analytics` | Teacher analytics (`?course=`) |
 | `(portal)/achievements` | Achievement book (progress, hidden ones as ???) |
 | `(portal)/admin/users`, `/progression`, `/items`, `/achievements`, `/audit` | Administration (`/items`: item and skill definitions; `/achievements`: achievement definitions) |
 | `(portal)/grading`, `(portal)/grading/[attemptId]` | Marking queue; grader |
+| `(portal)/help`, `(portal)/help/[slug]` | Help Center (`?topic=`), articles; every role, content filtered by role on the server |
 | `(auth)/login`, `(auth)/signup` (`?code=`), `(auth)/forgot-password`, `(auth)/reset-password`, `privacy`, `not-found` | Public |
 
 ---

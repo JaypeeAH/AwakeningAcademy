@@ -257,6 +257,76 @@ export type Database = {
                     },
                 ]
             }
+            ai_draft_requests: {
+                Row: {
+                    id: string
+                    teacher_id: string | null
+                    course_id: string | null
+                    activity_id: string | null
+                    provider: string
+                    model: string
+                    requested_count: number
+                    drafted_count: number
+                    input_tokens: number | null
+                    output_tokens: number | null
+                    status: string
+                    error: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    teacher_id?: string | null
+                    course_id?: string | null
+                    activity_id?: string | null
+                    provider: string
+                    model: string
+                    requested_count: number
+                    drafted_count?: number
+                    input_tokens?: number | null
+                    output_tokens?: number | null
+                    status: string
+                    error?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    teacher_id?: string | null
+                    course_id?: string | null
+                    activity_id?: string | null
+                    provider?: string
+                    model?: string
+                    requested_count?: number
+                    drafted_count?: number
+                    input_tokens?: number | null
+                    output_tokens?: number | null
+                    status?: string
+                    error?: string | null
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'ai_draft_requests_activity_id_fkey'
+                        columns: ['activity_id']
+                        isOneToOne: false
+                        referencedRelation: 'activities'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'ai_draft_requests_course_id_fkey'
+                        columns: ['course_id']
+                        isOneToOne: false
+                        referencedRelation: 'courses'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'ai_draft_requests_teacher_id_fkey'
+                        columns: ['teacher_id']
+                        isOneToOne: false
+                        referencedRelation: 'profiles'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             attempt_allowances: {
                 Row: {
                     student_id: string
@@ -1483,6 +1553,8 @@ export type Database = {
                     position: number
                     created_at: string
                     phase: number
+                    objective: string
+                    ai_draft: boolean
                 }
                 Insert: {
                     id?: string
@@ -1493,6 +1565,8 @@ export type Database = {
                     position?: number
                     created_at?: string
                     phase?: number
+                    objective?: string
+                    ai_draft?: boolean
                 }
                 Update: {
                     id?: string
@@ -1503,6 +1577,8 @@ export type Database = {
                     position?: number
                     created_at?: string
                     phase?: number
+                    objective?: string
+                    ai_draft?: boolean
                 }
                 Relationships: [
                     {
@@ -1596,6 +1672,24 @@ export type Database = {
                     min_average_score?: number
                     min_passed_assessments?: number
                     min_completed_lessons?: number
+                }
+                Relationships: []
+            }
+            rate_limit_hits: {
+                Row: {
+                    key: string
+                    window_start: string
+                    hits: number
+                }
+                Insert: {
+                    key: string
+                    window_start: string
+                    hits?: number
+                }
+                Update: {
+                    key?: string
+                    window_start?: string
+                    hits?: number
                 }
                 Relationships: []
             }
@@ -2163,6 +2257,10 @@ export type Database = {
                     p_question_id?: string
                     p_actor_id?: string
                 }
+                Returns: Json
+            }
+            hit_rate_limit: {
+                Args: { p_key: string; p_window_seconds: number; p_max: number }
                 Returns: Json
             }
             is_admin: {

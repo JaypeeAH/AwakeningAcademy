@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useContext } from 'react'
+import { Children, useState, useEffect, useContext } from 'react'
 import { useConfig } from '../ConfigProvider'
 import { CollapseContextProvider } from './context/collapseContext'
 import classNames from 'classnames'
@@ -92,7 +92,9 @@ const MenuCollapse = (props: MenuCollapseProps) => {
                     }}
                     transition={{ duration: 0.15 }}
                 >
-                    {children}
+                    {Children.map(children, (child) => (
+                        <li>{child}</li>
+                    ))}
                 </motion.ul>
             </CollapseContextProvider>
         </div>

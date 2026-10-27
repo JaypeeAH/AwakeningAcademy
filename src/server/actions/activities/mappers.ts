@@ -61,6 +61,7 @@ export const mapQuestion = (row: QuestionRow): Question => ({
     points: row.points,
     position: row.position,
     phase: row.phase,
+    objective: row.objective,
     options: [...row.options]
         .sort((a, b) => a.position - b.position)
         .map((o) => ({ id: o.id, label: o.label, position: o.position })),
@@ -68,6 +69,7 @@ export const mapQuestion = (row: QuestionRow): Question => ({
 
 export const mapKeyedQuestion = (row: QuestionRow): KeyedQuestion => ({
     ...mapQuestion(row),
+    aiDraft: row.ai_draft,
     key: {
         correctOptionIds: row.key?.correct_option_ids ?? [],
         acceptedAnswers: row.key?.accepted_answers ?? [],

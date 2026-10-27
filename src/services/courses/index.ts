@@ -10,6 +10,7 @@ import type {
     UpdateCourseInput,
 } from '@/@types/courses/CourseSchema'
 import type { CourseProgressReport } from '@/@types/reports/Reports'
+import type { SampleCourseAdded, SampleCourseSummary } from '@/@types/courses/SampleCourse'
 
 export const coursesUrl = '/courses'
 export const getCourseUrl = (courseId: string) => `/courses/${courseId}`
@@ -51,6 +52,23 @@ export const apiResetJoinCode = async (courseId: string) =>
 
 export const apiJoinCourse = (input: JoinCourseInput) =>
     api.fetchJson<{ courseId: string; title: string }>({ method: 'post', url: `${coursesUrl}/join`, data: input })
+
+// ── Sample courses ──
+
+export const sampleCoursesUrl = `${coursesUrl}/samples`
+
+export const apiGetSampleCourses = () => api.fetchJson<SampleCourseSummary[]>({ method: 'get', url: sampleCoursesUrl })
+
+export const useSWRSampleCourses = (enabled: boolean, config?: SWRConfiguration<SampleCourseSummary[]>) =>
+    useSWR(enabled ? sampleCoursesUrl : null, apiGetSampleCourses, config)
+
+/** Builds and publishes a whole course, so it gets longer than the usual timeout */
+export const apiAddSampleCourse = (sampleId: string) =>
+    api.fetchJson<SampleCourseAdded>({
+        method: 'post',
+        url: `${sampleCoursesUrl}/${encodeURIComponent(sampleId)}`,
+        timeout: 90_000,
+    })
 
 // ── Roster ──
 

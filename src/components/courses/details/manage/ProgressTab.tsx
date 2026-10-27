@@ -12,7 +12,7 @@ import { RankTag } from '@/components/game/GameTags'
 import { CourseProgressSWRProvider } from './ManageSWRProviders'
 import navigationIcon, { CheckIcon, WarningIcon } from '@/configs/icons.config'
 import { useCourseProgressStore } from '@/stores/GameStores'
-import { getActivityResultsPath } from '@/configs/app.config'
+import { getActivityResultsPath, getAnalyticsPath } from '@/configs/app.config'
 import { activityKindLabel, isAssessment } from '@/@types/activities/ActivityKindOptions'
 import { formatDate } from '@/utils/dates'
 import classNames from '@/utils/classNames'
@@ -64,7 +64,11 @@ function Progress({ courseId }: ProgressTabProps) {
         <div className="space-y-6">
             <Alert showIcon type="info">
                 Scores measure learning; XP and rank measure engagement. Students are flagged on scores and missed work
-                only.
+                only.{' '}
+                <Link href={getAnalyticsPath(courseId)} className="font-semibold underline">
+                    See detailed analytics
+                </Link>{' '}
+                — objectives, most-missed questions, overdue work and more.
             </Alert>
 
             <div className="grid gap-4 sm:grid-cols-3">

@@ -24,6 +24,7 @@ export const auditActionLabel: Record<string, string> = {
     'xp.adjusted': 'Adjusted XP',
     'progression.updated': 'Updated progression rules',
     'course.created': 'Created a course',
+    'course.sample_added': 'Added a sample course',
     'course.updated': 'Updated a course',
     'course.join_code_reset': 'Reset a join code',
     'course.student_added': 'Added a student',

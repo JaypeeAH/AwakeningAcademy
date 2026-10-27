@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
+import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 import Button from '@/components/ui/Button'
 import Dropdown from '@/components/ui/Dropdown'
 import EmptyState from '@/components/shared/EmptyState'
@@ -9,9 +9,10 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog'
 import QuestionEditor from './QuestionEditor'
 import AddFromBankDialog from '@/components/bank/AddFromBankDialog'
 import SaveToBankDialog from '@/components/bank/SaveToBankDialog'
+import AiDraftDialog from './AiDraftDialog'
 import { toastSuccess } from '@/components/ui/toast/toast'
 import { duplicateQuestion, newQuestion, questionInputToForm, toQuestionInput } from './activityForm'
-import navigationIcon, { AddIcon, BankIcon } from '@/configs/icons.config'
+import navigationIcon, { AddIcon, BankIcon, SparkleIcon } from '@/configs/icons.config'
 import type { QuestionInput } from '@/@types/activities/ActivitySchema'
 import { AUTHORABLE_QUESTION_KINDS, questionKindLabel, type QuestionKind } from '@/@types/activities/Question'
 import type { ActivityFormData } from '@/@types/activities/forms/ActivityFormData'
@@ -21,6 +22,9 @@ const MAX_QUESTIONS = 200
 
 interface QuestionListEditorProps {
     courseId: string
+    activityId: string
+    /** This course's lessons (AI drafting can work from one) */
+    lessons: { id: string; title: string }[]
     /** Graded attempts so far: questions students answered can't be removed */
     attemptCount: number
     issues: ActivityIssue[]
@@ -29,7 +33,14 @@ interface QuestionListEditorProps {
 }
 
 /** The questions of a quiz/exam/homework: add by type or from the bank, reorder, duplicate, save to bank, delete */
-export default function QuestionListEditor({ courseId, attemptCount, issues, phases }: QuestionListEditorProps) {
+export default function QuestionListEditor({
+    courseId,
+    activityId,
+    lessons,
+    attemptCount,
+    issues,
+    phases,
+}: QuestionListEditorProps) {
     const {
         control,
         getValues,
@@ -40,6 +51,23 @@ export default function QuestionListEditor({ courseId, attemptCount, issues, pha
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
     const [bankOpen, setBankOpen] = useState(false)
     const [saving, setSaving] = useState<QuestionInput | null>(null)
+    const [aiOpen, setAiOpen] = useState(false)
+    const objectiveRows = useWatch({ control, name: 'objectives' })
+    const objectives = [...new Set((objectiveRows ?? []).map((o) => o.text.trim()).filter(Boolean))]
+
+    const addDrafts = (questions: QuestionInput[]) => {
+        // Boss battles: drafts join the last phase, like new questions
+        append(questions.map((q) => ({ ...questionInputToForm(q), phase: phases?.length || 1 })))
+        toastSuccess(
+            `${questions.length} ${questions.length === 1 ? 'draft' : 'drafts'} added — review each before publishing.`,
+            { duration: 5000 },
+        )
+        requestAnimationFrame(() =>
+            document
+                .getElementById(`question-${questions[0]?.id}`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+        )
+    }
 
     const addFromBank = (questions: QuestionInput[]) => {
         append(questions.map(questionInputToForm))
@@ -93,8 +121,21 @@ export default function QuestionListEditor({ courseId, attemptCount, issues, pha
         </Button>
     )
 
+    const aiButton = (
+        <Button
+            type="button"
+            size="sm"
+            icon={<SparkleIcon />}
+            disabled={fields.length >= MAX_QUESTIONS}
+            onClick={() => setAiOpen(true)}
+        >
+            Draft with AI
+        </Button>
+    )
+
     const addActions = (
         <div className="flex flex-wrap items-center gap-2">
+            {aiButton}
             {bankButton}
             {addMenu}
         </div>
@@ -139,6 +180,7 @@ export default function QuestionListEditor({ courseId, attemptCount, issues, pha
                                         onDelete={() => setDeleteIndex(index)}
                                         onSaveToBank={() => setSaving(toQuestionInput(value))}
                                         phases={phases}
+                                        objectives={objectives}
                                     />
                                 )}
                             />
@@ -153,6 +195,15 @@ export default function QuestionListEditor({ courseId, attemptCount, issues, pha
                 onClose={() => setBankOpen(false)}
                 onAdd={addFromBank}
                 remaining={MAX_QUESTIONS - fields.length}
+            />
+            <AiDraftDialog
+                isOpen={aiOpen}
+                onClose={() => setAiOpen(false)}
+                activityId={activityId}
+                lessons={lessons}
+                objectives={objectives}
+                remainingSlots={MAX_QUESTIONS - fields.length}
+                onDrafted={addDrafts}
             />
             <SaveToBankDialog
                 courseId={courseId}

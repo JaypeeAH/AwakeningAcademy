@@ -12,9 +12,13 @@
         "format:check": "prettier --check .",
         "test": "vitest run",
         "test:watch": "vitest",
-        "db:types": "node scripts/generate-db-types.mjs && prettier --write src/@types/supabase/database.types.ts"
+        "db:types": "node scripts/generate-db-types.mjs && prettier --write src/@types/supabase/database.types.ts",
+        "db:sample-seed": "node scripts/generate-sample-seed.mjs",
+        "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+        "test:e2e": "node --env-file=.env.local node_modules/@playwright/test/cli.js test"
     },
     "dependencies": {
+        "@anthropic-ai/sdk": "0.131.0",
         "@floating-ui/react": "^0.27.20",
         "@hookform/resolvers": "^3.10.0",
         "@supabase/ssr": "^0.12.7",
@@ -51,7 +55,9 @@
         "zustand": "^5.0.15"
     },
     "devDependencies": {
+        "@axe-core/playwright": "4.13.0",
         "@electric-sql/pglite": "^0.5.11",
+        "@playwright/test": "1.64.0",
         "@types/node": "^22.14.0",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
@@ -63,5 +69,8 @@
         "tailwindcss": "^4.3.3",
         "typescript": "~5.9.3",
         "vitest": "^4.0.0"
+    },
+    "overrides": {
+        "playwright-core": "1.64.0"
     }
 }

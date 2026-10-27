@@ -53,3 +53,13 @@ export const apiGetAuditEvents = async (query: Partial<AuditQuery>) => {
 
 export const useSWRAuditEvents = (query: Partial<AuditQuery>, config?: SWRConfiguration<Collection<AuditEvent>>) =>
     useSWR(getAuditUrl(query), () => apiGetAuditEvents(query), { keepPreviousData: true, ...config })
+
+// ── Privacy requests ──
+
+/** Downloads (a plain link: the browser saves the JSON file) */
+export const myDataExportUrl = '/api/me/export'
+export const getUserExportUrl = (userId: string) => `/api/admin/users/${userId}/export`
+
+/** Admin: delete an account and everything personal to it */
+export const apiDeleteUser = (userId: string) =>
+    api.fetchJson<void>({ method: 'delete', url: `/admin/users/${userId}` })

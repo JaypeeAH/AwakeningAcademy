@@ -11,8 +11,8 @@ import ErrorState from '@/components/shared/ErrorState'
 import EmptyState from '@/components/shared/EmptyState'
 import SystemPanel from '@/components/game/SystemPanel'
 import SubjectPathList from './SubjectPathList'
-import { CheckIcon, ClassIcon, EditIcon } from '@/configs/icons.config'
-import { apiUpdateProfile, useSWRProfile } from '@/services/users'
+import { CheckIcon, ClassIcon, EditIcon, FileIcon } from '@/configs/icons.config'
+import { apiUpdateProfile, myDataExportUrl, useSWRProfile } from '@/services/users'
 import { useProfileStore } from '@/stores/GameStores'
 import useSyncResource from '@/utils/hooks/useSyncResource'
 import { usePageBreadcrumbs } from '@/utils/hooks/useBreadcrumbs'
@@ -217,7 +217,7 @@ export default function ProfileClientPage() {
                                 </p>
                             )}
                         </SystemPanel>
-                        <SystemPanel eyebrow="Privacy" title="Leaderboards" className="lg:col-span-2">
+                        <SystemPanel eyebrow="Privacy" title="Leaderboards">
                             <label className="flex items-start gap-3 text-sm">
                                 <Switcher
                                     checked={!profile.leaderboardHidden}
@@ -235,6 +235,23 @@ export default function ProfileClientPage() {
                                     </span>
                                 </span>
                             </label>
+                        </SystemPanel>
+                        <SystemPanel eyebrow="Privacy" title="Your data">
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                Download a copy of everything The Awakening Academy stores about you: your profile,
+                                progress, answers, rewards and more.
+                            </p>
+                            <a
+                                href={myDataExportUrl}
+                                download
+                                className="mt-3 inline-flex items-center gap-2 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-100"
+                            >
+                                <FileIcon aria-hidden /> Download my data
+                            </a>
+                            <p className="mt-3 text-xs text-gray-500">
+                                Want your account deleted? Ask your teacher or school administrator — they can remove it
+                                and everything in it.
+                            </p>
                         </SystemPanel>
                     </div>
                 </>

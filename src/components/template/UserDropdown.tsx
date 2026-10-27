@@ -4,8 +4,8 @@ import Link from 'next/link'
 import Dropdown from '@/components/ui/Dropdown'
 import Tag from '@/components/ui/Tag'
 import UserAvatar from '@/components/shared/UserAvatar'
-import { ClassIcon, RolesIcon, SignOutIcon } from '@/configs/icons.config'
-import { profilePath, rolesPath, signOutUrl } from '@/configs/app.config'
+import navigationIcon, { ClassIcon, RolesIcon, SignOutIcon } from '@/configs/icons.config'
+import { helpPath, profilePath, rolesPath, signOutUrl } from '@/configs/app.config'
 import { roleLabel, roleTagClass } from '@/@types/auth/Roles'
 import useSession from '@/utils/hooks/useSession'
 
@@ -58,6 +58,11 @@ export default function UserDropdown() {
                     </Link>
                 </Dropdown.Item>
             )}
+            <Dropdown.Item eventKey="help" className="px-0">
+                <Link href={helpPath} className="flex h-full w-full items-center gap-2 px-2">
+                    <span className="text-lg">{navigationIcon.help}</span> Help Center
+                </Link>
+            </Dropdown.Item>
             <Dropdown.Item eventKey="sign-out" className="px-0">
                 {/* A form post: the route ends the session and redirects to sign-in */}
                 <form action={signOutUrl} method="post" className="h-full w-full">

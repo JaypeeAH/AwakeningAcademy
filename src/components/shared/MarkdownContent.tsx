@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Element, ElementContent } from 'hast'
@@ -16,6 +17,8 @@ interface MarkdownContentProps {
     secrets?: boolean
     /** Teacher previews: show where secret markers are (students never see these labels) */
     showSecretMarkers?: boolean
+    /** Help articles: links to pages in this app (`/…`) open in the same tab */
+    internalLinks?: boolean
 }
 
 /** Keeps secret marker links (react-markdown drops unknown URL schemes); everything else as usual */
@@ -46,7 +49,13 @@ const CALLOUT_ICON: Record<CalloutType, React.ReactNode> = {
  *   ![Alt](image "Caption")                                     → an image with a caption
  *   > [!TIP] / [!NOTE] / [!IMPORTANT] / [!WARNING]              → a callout box
  */
-export default function MarkdownContent({ children, className, secrets, showSecretMarkers }: MarkdownContentProps) {
+export default function MarkdownContent({
+    children,
+    className,
+    secrets,
+    showSecretMarkers,
+    internalLinks,
+}: MarkdownContentProps) {
     const components: Components = {
         p: ({ node, children: content }) => {
             const only = soleElement(node)
@@ -117,6 +126,9 @@ export default function MarkdownContent({ children, className, secrets, showSecr
                 // Outside lessons a marker is just its label (or nothing, for hidden sections)
                 if (!secrets) return secret[1] ? null : <>{label}</>
                 return <SecretMarker markerKey={secret[2]} seen={!!secret[1]} label={label} />
+            }
+            if (internalLinks && href?.startsWith('/') && !href.startsWith('//')) {
+                return <Link href={href}>{label}</Link>
             }
             return (
                 <a href={href} target="_blank" rel="noopener noreferrer">

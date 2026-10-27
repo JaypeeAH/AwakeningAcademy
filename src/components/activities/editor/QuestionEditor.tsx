@@ -8,7 +8,16 @@ import Switcher from '@/components/ui/Switcher'
 import Tooltip from '@/components/ui/Tooltip'
 import NumberInput from './NumberInput'
 import { convertQuestion } from './activityForm'
-import { AddIcon, BankIcon, CopyIcon, DeleteIcon, MoveDownIcon, MoveUpIcon } from '@/configs/icons.config'
+import {
+    AddIcon,
+    BankIcon,
+    CheckIcon,
+    CopyIcon,
+    DeleteIcon,
+    MoveDownIcon,
+    MoveUpIcon,
+    SparkleIcon,
+} from '@/configs/icons.config'
 import {
     AUTHORABLE_QUESTION_KINDS,
     isChoiceKind,
@@ -40,6 +49,8 @@ interface QuestionEditorProps {
     onSaveToBank: () => void
     /** Boss battles: phase titles (shows a phase picker) */
     phases?: string[]
+    /** The activity's learning objectives (shows an objective picker when there are any) */
+    objectives?: string[]
 }
 
 const kindOptions = AUTHORABLE_QUESTION_KINDS.map((k) => ({ value: k, label: questionKindLabel[k] }))
@@ -61,6 +72,7 @@ export default function QuestionEditor({
     onDelete,
     onSaveToBank,
     phases,
+    objectives = [],
 }: QuestionEditorProps) {
     const id = useId()
     const q = value
@@ -68,6 +80,15 @@ export default function QuestionEditor({
     const manual = isManuallyGraded(q.kind)
     const fixedOptions = q.kind === 'true_false'
     const multiple = q.kind === 'multiple_choice'
+
+    const objectiveOptions = [
+        { value: '', label: 'None' },
+        ...objectives.map((o) => ({ value: o, label: o })),
+        // A saved objective that has since been renamed or removed stays visible until changed
+        ...(q.objective && !objectives.includes(q.objective)
+            ? [{ value: q.objective, label: `${q.objective} (removed)` }]
+            : []),
+    ]
 
     const phaseOptions = phases?.map((title, i) => ({ value: i + 1, label: `${i + 1}. ${title || 'Untitled'}` }))
 
@@ -154,6 +175,30 @@ export default function QuestionEditor({
                 </div>
             </header>
 
+            {q.aiDraft && (
+                <div
+                    className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary-subtle px-4 py-3"
+                    role="status"
+                >
+                    <p className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-100">
+                        <SparkleIcon className="mt-0.5 shrink-0 text-primary" aria-hidden />
+                        <span>
+                            <strong>Drafted by AI</strong> — check the question, answers and explanation, then mark it
+                            reviewed.
+                        </span>
+                    </p>
+                    <Button
+                        type="button"
+                        size="xs"
+                        variant="solid"
+                        icon={<CheckIcon />}
+                        onClick={() => set({ aiDraft: false })}
+                    >
+                        Mark as reviewed
+                    </Button>
+                </div>
+            )}
+
             <div
                 className={classNames(
                     'grid gap-3',
@@ -216,6 +261,22 @@ export default function QuestionEditor({
                 />
                 {errors?.prompt?.message && <p className="mt-1 text-xs text-error">{errors.prompt.message}</p>}
             </div>
+
+            {objectives.length > 0 && (
+                <div className="mt-3 sm:max-w-md">
+                    <label htmlFor={`${id}-objective`} className="form-label mb-1 block">
+                        Learning objective{' '}
+                        <span className="text-xs font-normal text-gray-500">(used in your analytics)</span>
+                    </label>
+                    <Select
+                        inputId={`${id}-objective`}
+                        options={objectiveOptions}
+                        value={objectiveOptions.find((o) => o.value === (q.objective ?? '')) ?? objectiveOptions[0]}
+                        onChange={(option) => set({ objective: option?.value ?? '' })}
+                        isSearchable={false}
+                    />
+                </div>
+            )}
 
             {isChoice ? (
                 <fieldset className="mt-4">

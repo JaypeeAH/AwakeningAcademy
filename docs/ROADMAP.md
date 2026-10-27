@@ -2,8 +2,8 @@
 
 **Status:** Phases 1 (foundation and progression engine), 2 (assessment depth), 3 (skills, inventory,
 Easter eggs and the Easter Bunny) and 4 (boss battles, team quests, achievements, guilds and leaderboards)
-are built. The lesson editor also gained a toolbar, images (upload, course library, link) and YouTube/Vimeo
-videos. Phase 2 also added sign-up with a class code, password reset,
+are built, and so is Phase 5 (AI drafting, analytics, polish and hardening). The lesson editor is a visual
+editor with images, YouTube/Vimeo videos, tip boxes and tables. Operations: [OPERATIONS.md](OPERATIONS.md). Phase 2 also added sign-up with a class code, password reset,
 and any-device email links. Each later phase below is a ready-to-use prompt,
 tied to the code that now exists. Paste one into a new session. Every prompt assumes the
 `follow-existing-codebase` skill, which has the rules on layers, security, reuse and styling.
@@ -176,7 +176,37 @@ Tests: achievement conditions, streak boundaries across midnight/timezones, team
 leaderboard privacy modes (RLS + API).
 ```
 
-## Phase 5: AI-assisted drafting, analytics depth, polish and hardening
+## Phase 5: AI-assisted drafting, analytics depth, polish and hardening — ✅ done
+
+Built as specified. The decisions:
+
+- **Migration:** `20261031000100_ai_analytics_hardening.sql`.
+- **AI drafts:**
+    - The interface is `QuestionDraftProvider` (`src/server/ai`), with Claude as the first provider via the
+      official SDK. It uses structured outputs (zod), `claude-opus-5-5` at medium effort, and server-side
+      refusal fallback.
+    - Model output is normalised and validated (`utils/aiDrafts.ts`). Drafts are flagged `ai_draft`, and
+      publishing is blocked until each one is reviewed.
+    - Requests are rate-limited (10 an hour, 40 a day per teacher) and logged in `ai_draft_requests`.
+- **Analytics:**
+    - `questions.objective` links each question to a learning objective. `/analytics` has course, module,
+      student and date filters.
+    - Calculations live in `utils/analytics.ts`. Skips and unmarked answers never count as wrong, and
+      bonus XP is shown apart.
+    - The dev-only seed is `scripts/seed-demo.mjs`, guarded twice.
+- **Hardening:**
+    - Rate limits are database-backed (`hit_rate_limit`, keys hashed, fail-open). No Upstash or KV needed.
+    - CSP and HSTS headers are set in `next.config.ts`.
+    - Error reporting is vendor-free: structured logs with reference codes plus an optional
+      `ERROR_WEBHOOK_URL`. Sentry can plug into one function.
+    - Privacy: personal data export (self and admin) and account deletion. A database test proves the
+      cascade.
+    - Backup and restore notes are in OPERATIONS.md, and Playwright tests cover the 15 acceptance
+      workflows.
+- **Polish:** reduced-motion safety net, an axe (WCAG 2 A/AA) pass with fixes, and responsive checks at
+  360, 768 and 1280.
+
+Original prompt:
 
 ```
 1. AI question drafts: a provider-independent server interface `QuestionDraftProvider` (server-only,
