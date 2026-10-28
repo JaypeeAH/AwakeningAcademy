@@ -331,7 +331,10 @@ export async function useSkill(user: SessionUser, input: UseSkillInput): Promise
                 db.from('courses').select('title').eq('id', input.courseId).single(),
             ])
             const foundIds = new Set(unwrap(found, 'load your discoveries').map((d) => d.egg_id))
-            const hidden = unwrap(eggs, 'load secrets').filter((e) => !foundIds.has(e.id))
+            const active = unwrap(eggs, 'load secrets')
+            if (!active.length)
+                throw new ConflictError('This course has no hidden secrets yet. Try another course.', 'NO_SECRETS')
+            const hidden = active.filter((e) => !foundIds.has(e.id))
             if (!hidden.length) throw new ConflictError('You’ve found every secret in this course!', 'NO_SECRETS_LEFT')
             const target = hidden[0]
             // The clue, or a nudge about where to look — never the answer itself

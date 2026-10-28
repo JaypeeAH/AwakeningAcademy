@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
+import Alert from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
 import Select from '@/components/ui/Select'
 import { FormItem } from '@/components/ui/Form'
@@ -10,6 +11,7 @@ import { CoursesSWRProvider } from '@/components/courses/CourseSWRProviders'
 import { SenseIcon } from '@/configs/icons.config'
 import { apiUseSkill } from '@/services/game'
 import { useCoursesStore, useSkillBookStore } from '@/stores/GameStores'
+import { getErrorCode, tryGetErrorMessage } from '@/utils/errors'
 import type { SkillEffect } from '@/@types/game/Inventory'
 
 type Sensed = Extract<SkillEffect, { kind: 'dungeon_sense' }>
@@ -26,6 +28,8 @@ function DungeonSenseForm({ onClose }: { onClose: () => void }) {
     const [courseId, setCourseId] = useState<string | null>(null)
     const [using, setUsing] = useState(false)
     const [sensed, setSensed] = useState<Sensed | null>(null)
+    /** Why the server said no (no secrets in the course, recharging, ...), shown beside the course picker */
+    const [problem, setProblem] = useState<string | null>(null)
 
     const options = useMemo(
         () =>
@@ -38,12 +42,14 @@ function DungeonSenseForm({ onClose }: { onClose: () => void }) {
     const sense = async () => {
         if (!courseId) return
         setUsing(true)
+        setProblem(null)
         try {
             const effect = await apiUseSkill({ skill: 'dungeon_sense', courseId })
             if (effect.kind === 'dungeon_sense') setSensed(effect)
             await refreshSkills()
         } catch (error) {
-            toastError('Dungeon Sense couldn’t find anything right now.', error)
+            if (getErrorCode(error)) setProblem(tryGetErrorMessage(error))
+            else toastError('Dungeon Sense couldn’t reach the dungeon. Try again.', error)
         } finally {
             setUsing(false)
         }
@@ -80,9 +86,17 @@ function DungeonSenseForm({ onClose }: { onClose: () => void }) {
                     isLoading={loadingCourses}
                     placeholder={options.length || loadingCourses ? 'Choose a course' : 'Join a course first'}
                     value={options.find((o) => o.value === courseId) ?? null}
-                    onChange={(option) => setCourseId(option?.value ?? null)}
+                    onChange={(option) => {
+                        setCourseId(option?.value ?? null)
+                        setProblem(null)
+                    }}
                 />
             </FormItem>
+            {problem && (
+                <Alert showIcon type="info" className="mt-4" aria-live="polite">
+                    {problem}
+                </Alert>
+            )}
             <div className="mt-6 flex justify-end gap-2">
                 <Button onClick={onClose}>Cancel</Button>
                 <Button variant="solid" icon={<SenseIcon />} loading={using} disabled={!courseId} onClick={sense}>
