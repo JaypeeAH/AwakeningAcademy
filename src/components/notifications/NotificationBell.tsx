@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Dropdown from '@/components/ui/Dropdown'
 import Button from '@/components/ui/Button'
 import { toastError } from '@/components/ui/toast/toast'
 import navigationIcon, { NotificationIcon } from '@/configs/icons.config'
 import { apiMarkNotificationsRead, useSWRNotifications } from '@/services/misc'
 import { useNotificationsStore } from '@/stores/GameStores'
-import { notificationIcon } from '@/@types/notifications/Notification'
+import { notificationIcon, notificationLink } from '@/@types/notifications/Notification'
+import type { AppNotification } from '@/@types/notifications/Notification'
 import useSyncResource from '@/utils/hooks/useSyncResource'
 import { fromNow } from '@/utils/dates'
 import classNames from '@/utils/classNames'
@@ -20,7 +22,7 @@ export function NotificationsSWRProvider() {
     return null
 }
 
-/** System messages: level ups, promotions, adjustments. Opening the menu doesn't mark them read; the button does. */
+/** System messages: level ups, promotions, adjustments. Opening the menu doesn't mark them read; clicking one, or the button, does. */
 export default function NotificationBell() {
     const feed = useNotificationsStore((state) => state.data)
     const setData = useNotificationsStore((state) => state.setData)
@@ -35,6 +37,20 @@ export default function NotificationBell() {
             toastError('Couldn’t mark notifications as read.', error)
         } finally {
             setMarking(false)
+        }
+    }
+
+    /** Clicking a message marks just that one read (optimistically) and follows its link */
+    const markRead = async (n: AppNotification) => {
+        if (n.readAt || !feed) return
+        setData({
+            records: feed.records.map((r) => (r.id === n.id ? { ...r, readAt: new Date() } : r)),
+            unread: Math.max(0, feed.unread - 1),
+        })
+        try {
+            setData(await apiMarkNotificationsRead({ ids: [n.id] }))
+        } catch (error) {
+            toastError('Couldn’t mark the notification as read.', error)
         }
     }
 
@@ -76,27 +92,50 @@ export default function NotificationBell() {
                         </p>
                     ) : (
                         <ul>
-                            {feed.records.map((n) => (
-                                <li
-                                    key={n.id}
-                                    className={classNames('flex gap-3 px-3 py-2.5', !n.readAt && 'bg-primary-subtle')}
-                                >
-                                    <span className="mt-0.5 text-lg text-primary">
-                                        {navigationIcon[notificationIcon[n.kind] ?? 'progression']}
-                                    </span>
-                                    <span className="min-w-0 flex-1">
-                                        <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                            {n.title}
+                            {feed.records.map((n) => {
+                                const href = notificationLink(n)
+                                const rowClass = 'flex w-full gap-3 px-3 py-2.5 text-left'
+                                const content = (
+                                    <>
+                                        <span className="mt-0.5 text-lg text-primary">
+                                            {navigationIcon[notificationIcon[n.kind] ?? 'progression']}
                                         </span>
-                                        {n.body && (
-                                            <span className="block text-xs text-gray-500 dark:text-gray-400">
-                                                {n.body}
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                {n.title}
                                             </span>
+                                            {n.body && (
+                                                <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                                    {n.body}
+                                                </span>
+                                            )}
+                                            <span className="block text-[11px] text-gray-400">
+                                                {fromNow(n.createdAt)}
+                                            </span>
+                                        </span>
+                                    </>
+                                )
+                                return (
+                                    <Dropdown.Item
+                                        key={n.id}
+                                        variant="custom"
+                                        eventKey={n.id}
+                                        className={classNames(
+                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700',
+                                            !n.readAt && 'bg-primary-subtle',
                                         )}
-                                        <span className="block text-[11px] text-gray-400">{fromNow(n.createdAt)}</span>
-                                    </span>
-                                </li>
-                            ))}
+                                        onClick={() => markRead(n)}
+                                    >
+                                        {href ? (
+                                            <Link href={href} className={rowClass}>
+                                                {content}
+                                            </Link>
+                                        ) : (
+                                            <div className={rowClass}>{content}</div>
+                                        )}
+                                    </Dropdown.Item>
+                                )
+                            })}
                         </ul>
                     )}
                 </div>

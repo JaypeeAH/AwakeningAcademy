@@ -1,5 +1,16 @@
 import { z } from 'zod'
 import type { NavigationIconKey } from '@/configs/icons.config'
+import {
+    achievementsPath,
+    codexPath,
+    coursesPath,
+    getCoursePath,
+    getLearnPath,
+    historyPath,
+    inventoryPath,
+    profilePath,
+    questsPath,
+} from '@/configs/app.config'
 
 export interface AppNotification {
     id: string
@@ -33,4 +44,35 @@ export const notificationIcon: Record<string, NavigationIconKey> = {
     achievement: 'achievements',
     team_quest: 'team',
     guild: 'team',
+}
+
+const str = (value: unknown) => (typeof value === 'string' && value ? value : undefined)
+
+/** Where clicking a notification takes the user, from its kind and the ids stored in `data`. */
+export function notificationLink({ kind, data }: Pick<AppNotification, 'kind' | 'data'>): string | undefined {
+    const courseId = str(data.courseId)
+    const activityId = str(data.activityId)
+    switch (kind) {
+        case 'level_up':
+        case 'rank_up':
+            return profilePath
+        case 'xp_adjusted':
+            return historyPath
+        case 'course_joined':
+            return courseId ? getCoursePath(courseId) : coursesPath
+        case 'graded':
+            return activityId ? getLearnPath(activityId, str(data.attemptId)) : undefined
+        case 'discovery':
+            return codexPath
+        case 'skill_unlocked':
+            return inventoryPath
+        case 'achievement':
+            return achievementsPath
+        case 'team_quest':
+            return activityId ? getLearnPath(activityId) : questsPath
+        case 'guild':
+            return courseId ? getCoursePath(courseId, 'guilds') : coursesPath
+        default:
+            return undefined
+    }
 }
