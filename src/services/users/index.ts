@@ -6,7 +6,7 @@ import type {
     CreateAccountsInput,
     CreateAccountsResult,
     SetRoleInput,
-    UpdateLoginInput,
+    UpdateAccountDetailsInput,
     UpdateProfileInput,
     UserAccount,
     UsersQuery,
@@ -51,13 +51,18 @@ export const useSWRUsers = (query: Partial<UsersQuery>, config?: SWRConfiguratio
 export const apiSetUserRole = (userId: string, input: SetRoleInput) =>
     api.fetchJson<void>({ method: 'patch', url: `/admin/users/${userId}`, data: input })
 
-/** Username-only student accounts from a pasted class list */
+/** Username-only student accounts: one, or a pasted class list */
 export const apiCreateAccounts = (input: CreateAccountsInput) =>
     api.fetchJson<CreateAccountsResult>({ method: 'post', url: '/admin/users', data: input })
 
-/** Set or clear a username, or set a new password */
-export const apiUpdateUserLogin = (userId: string, input: UpdateLoginInput) =>
-    api.fetchJson<void>({ method: 'patch', url: `/admin/users/${userId}/login`, data: input })
+/** Set or clear a username or section, or set a new password */
+export const apiUpdateAccountDetails = (userId: string, input: UpdateAccountDetailsInput) =>
+    api.fetchJson<void>({ method: 'patch', url: `/admin/users/${userId}/details`, data: input })
+
+/** The sections in use, suggested when adding or editing accounts */
+export const sectionsUrl = '/admin/users/sections'
+export const useSWRSections = (config?: SWRConfiguration<string[]>) =>
+    useSWR(sectionsUrl, () => api.fetchJson<string[]>({ method: 'get', url: sectionsUrl }), config)
 
 export const getAuditUrl = ({ page, entityType }: Partial<AuditQuery>) =>
     `/admin/audit?page=${page ?? 1}${entityType ? `&entityType=${encodeURIComponent(entityType)}` : ''}`

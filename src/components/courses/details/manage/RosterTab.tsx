@@ -108,7 +108,14 @@ function Roster({ courseId }: RosterTabProps) {
                                                 <div className="font-semibold text-gray-900 dark:text-gray-50">
                                                     {s.displayName}
                                                 </div>
-                                                <div className="truncate text-xs text-gray-500">{signInName(s)}</div>
+                                                <div className="truncate text-xs text-gray-500">
+                                                    {signInName(s)}
+                                                    {s.section && (
+                                                        <span className="ml-1.5 font-semibold text-primary">
+                                                            · {s.section}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </Td>

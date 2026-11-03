@@ -19,7 +19,7 @@ import ChangeRoleDialog from './ChangeRoleDialog'
 import AdjustXpDialog from './AdjustXpDialog'
 import DeleteAccountDialog from './DeleteAccountDialog'
 import AddAccountsDialog from './AddAccountsDialog'
-import SignInDetailsDialog from './SignInDetailsDialog'
+import AccountDetailsDialog from './AccountDetailsDialog'
 import {
     AddUserIcon,
     DeleteIcon,
@@ -57,7 +57,14 @@ const ROLE_FILTERS: { value: Role | 'all'; label: string }[] = [
 /** Search box that updates the store's query after typing pauses */
 function UserSearch() {
     const setQuery = useUsersStore((s) => s.setQuery)
-    const [text, setText] = useState(() => useUsersStore.getState().query.q)
+    const storeQuery = useUsersStore((s) => s.query.q)
+    const [text, setText] = useState(storeQuery)
+    // When something else sets the search (a section tag), show it in the box
+    const [lastStoreQuery, setLastStoreQuery] = useState(storeQuery)
+    if (storeQuery !== lastStoreQuery) {
+        setLastStoreQuery(storeQuery)
+        if (text.trim() !== storeQuery) setText(storeQuery)
+    }
     const debounced = useDebouncedValue(text.trim(), 350)
     useEffect(() => {
         if (useUsersStore.getState().query.q !== debounced) setQuery({ q: debounced })
@@ -73,7 +80,7 @@ function UserSearch() {
                 size="sm"
                 type="search"
                 prefix={<SearchIcon className="text-lg text-gray-400" />}
-                placeholder="Search by name, email or username"
+                placeholder="Search by name, username or section"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />
@@ -211,6 +218,18 @@ export default function UsersClientPage() {
                                                                             (you)
                                                                         </span>
                                                                     )}
+                                                                    {account.section && (
+                                                                        <button
+                                                                            type="button"
+                                                                            className="ml-2 rounded-md bg-primary-subtle px-1.5 py-0.5 align-middle text-xs font-semibold text-primary hover:underline"
+                                                                            title={`Show everyone in ${account.section}`}
+                                                                            onClick={() =>
+                                                                                setQuery({ q: account.section ?? '' })
+                                                                            }
+                                                                        >
+                                                                            {account.section}
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                                 <div className="truncate text-xs text-gray-500">
                                                                     {isPlaceholderEmail(account.email)
@@ -265,12 +284,12 @@ export default function UsersClientPage() {
                                                                     Adjust XP
                                                                 </Button>
                                                             )}
-                                                            <Tooltip title="Username and password">
+                                                            <Tooltip title="Username, password and section">
                                                                 <Button
                                                                     size="xs"
                                                                     variant="plain"
                                                                     icon={<PasswordIcon />}
-                                                                    aria-label={`Sign-in details for ${account.displayName}`}
+                                                                    aria-label={`Account details for ${account.displayName}`}
                                                                     onClick={() => setEditingLogin(account)}
                                                                 />
                                                             </Tooltip>
@@ -327,7 +346,7 @@ export default function UsersClientPage() {
             />
             {adding && <AddAccountsDialog onClose={() => setAdding(false)} />}
             {editingLogin && (
-                <SignInDetailsDialog key={editingLogin.id} user={editingLogin} onClose={() => setEditingLogin(null)} />
+                <AccountDetailsDialog key={editingLogin.id} user={editingLogin} onClose={() => setEditingLogin(null)} />
             )}
             {adjusting && <AdjustXpDialog key={adjusting.id} student={adjusting} onClose={() => setAdjusting(null)} />}
             <DeleteAccountDialog

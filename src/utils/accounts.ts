@@ -19,6 +19,17 @@ export const isPlaceholderEmail = (email: string) => email.trim().toLowerCase().
 export const signInName = ({ email, username }: { email: string; username: string | null }) =>
     isPlaceholderEmail(email) ? (username ?? '') : email
 
+// Letters and digits that can't be mistaken for each other when read aloud or copied by hand
+const LOWER = 'abcdefghjkmnpqrstuvwxyz'
+const UPPER = 'ABCDEFGHJKMNPQRSTUVWXYZ'
+const DIGITS = '23456789'
+
+const pick = (alphabet: string, count: number) =>
+    Array.from(crypto.getRandomValues(new Uint32Array(count)), (n) => alphabet[n % alphabet.length]).join('')
+
+/** A new student password in the school's usual shape, e.g. "kqm-482-HPW" (11 characters) */
+export const generatePassword = () => `${pick(LOWER, 3)}-${pick(DIGITS, 3)}-${pick(UPPER, 3)}`
+
 // ── Pasting a class list ──────────────────────────────────────────────────────────────────────────
 
 export interface AccountLine {

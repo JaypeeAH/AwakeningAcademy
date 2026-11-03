@@ -43,3 +43,33 @@ describe('usernames', () => {
         ).rejects.toThrow(/permission denied/)
     })
 })
+
+describe('sections', () => {
+    let db: TestDb
+    let student: string
+
+    const setSection = (section: string | null) =>
+        db.query(`update public.profiles set section = $1 where id = $2`, [section, student])
+
+    beforeEach(async () => {
+        db = await createTestDb()
+        student = await createUser(db, 'ava@school.test')
+    })
+
+    it('holds a trimmed label of up to 40 characters, shared by any number of students', async () => {
+        await setSection('11-STEM A')
+        await db.query(`update public.profiles set section = '11-STEM A' where id = $1`, [
+            await createUser(db, 'ben@school.test'),
+        ])
+        await expect(setSection(' 11-STEM A')).rejects.toThrow(/profiles_section_length/)
+        await expect(setSection('')).rejects.toThrow(/profiles_section_length/)
+        await expect(setSection('x'.repeat(41))).rejects.toThrow(/profiles_section_length/)
+        await setSection(null)
+    })
+
+    it('can’t be changed by the signed-in student', async () => {
+        await expect(
+            asUser(db, student, () => db.query(`update public.profiles set section = 'mine' where id = $1`, [student])),
+        ).rejects.toThrow(/permission denied/)
+    })
+})

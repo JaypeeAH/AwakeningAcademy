@@ -8,6 +8,8 @@ export interface UserAccount {
     /** A placeholder for username-only accounts (see utils/accounts) */
     email: string
     username: string | null
+    /** Class or group label set by an administrator, e.g. "11-STEM A" */
+    section: string | null
     displayName: string
     role: Role
     createdAt: Date
@@ -41,6 +43,14 @@ export const UsernameSchema = z
     .toLowerCase()
     .regex(USERNAME_PATTERN, 'Use 3–32 letters, digits, dots, dashes or underscores')
 
+/** A class or group label; empty means none */
+export const SectionSchema = z
+    .string()
+    .trim()
+    .max(40, 'Keep the section under 40 characters')
+    .regex(/^[^<>]*$/, 'Sections can’t include < or >')
+    .transform((section) => section || null)
+
 /** Most accounts one "Add accounts" request may create (each is a call to Supabase Auth) */
 export const MAX_NEW_ACCOUNTS = 100
 
@@ -50,6 +60,8 @@ export const CreateAccountsSchema = z.object({
         .array(z.object({ displayName: DisplayNameSchema, username: UsernameSchema, password: NewPasswordSchema }))
         .min(1, 'Add at least one account')
         .max(MAX_NEW_ACCOUNTS, `Add up to ${MAX_NEW_ACCOUNTS} accounts at a time`),
+    /** Given to every new account */
+    section: SectionSchema.nullable().default(null),
     courseId: z.string().uuid().nullable().default(null),
 })
 export type CreateAccountsInput = z.infer<typeof CreateAccountsSchema>
@@ -61,11 +73,12 @@ export interface CreateAccountsResult {
     courseTitle: string | null
 }
 
-/** PATCH /api/admin/users/[userId]/login — set or clear the username, or set a new password */
-export const UpdateLoginSchema = z
+/** PATCH /api/admin/users/[userId]/details — username, a new password and the section */
+export const UpdateAccountDetailsSchema = z
     .object({
         username: UsernameSchema.nullable().optional(),
         password: NewPasswordSchema.optional(),
+        section: SectionSchema.nullable().optional(),
     })
-    .refine((input) => input.username !== undefined || input.password !== undefined, 'Nothing to change')
-export type UpdateLoginInput = z.infer<typeof UpdateLoginSchema>
+    .refine((input) => Object.values(input).some((v) => v !== undefined), 'Nothing to change')
+export type UpdateAccountDetailsInput = z.infer<typeof UpdateAccountDetailsSchema>

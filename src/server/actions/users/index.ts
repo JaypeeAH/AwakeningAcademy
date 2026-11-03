@@ -10,7 +10,7 @@ import type {
     CreateAccountsInput,
     CreateAccountsResult,
     SetRoleInput,
-    UpdateLoginInput,
+    UpdateAccountDetailsInput,
     UpdateProfileInput,
     UserAccount,
     UsersQuery,
@@ -23,7 +23,7 @@ export async function getUsers({ q, role, page }: UsersQuery): Promise<Collectio
     let query = supabaseAdmin()
         .from('profiles')
         .select(
-            'id, email, username, display_name, role, created_at, progress:student_progress(total_xp, level, rank:ranks(code))',
+            'id, email, username, section, display_name, role, created_at, progress:student_progress(total_xp, level, rank:ranks(code))',
             { count: 'exact' },
         )
         .order('display_name')
@@ -32,7 +32,10 @@ export async function getUsers({ q, role, page }: UsersQuery): Promise<Collectio
     if (q) {
         // Escape PostgREST filter syntax characters before building the or() filter
         const term = q.replace(/[%_,()\\]/g, ' ').trim()
-        if (term) query = query.or(`display_name.ilike.%${term}%,email.ilike.%${term}%,username.ilike.%${term}%`)
+        if (term)
+            query = query.or(
+                `display_name.ilike.%${term}%,email.ilike.%${term}%,username.ilike.%${term}%,section.ilike.%${term}%`,
+            )
     }
     const result = await query
     return {
@@ -43,6 +46,7 @@ export async function getUsers({ q, role, page }: UsersQuery): Promise<Collectio
                 id: row.id,
                 email: row.email,
                 username: row.username,
+                section: row.section,
                 displayName: row.display_name,
                 role: row.role,
                 createdAt: new Date(row.created_at),
@@ -93,7 +97,7 @@ function accountErrorReason(error: { code?: string; message: string }) {
  */
 export async function createUsernameAccounts(
     admin: SessionUser,
-    { accounts, courseId }: CreateAccountsInput,
+    { accounts, section, courseId }: CreateAccountsInput,
 ): Promise<CreateAccountsResult> {
     const db = supabaseAdmin()
     let course: { id: string; title: string } | null = null
@@ -136,7 +140,7 @@ export async function createUsernameAccounts(
             continue
         }
         // handle_new_user made the profile; the username is written here, by the server
-        const named = await db.from('profiles').update({ username }).eq('id', data.user.id)
+        const named = await db.from('profiles').update({ username, section }).eq('id', data.user.id)
         if (named.error) {
             await db.auth.admin.deleteUser(data.user.id)
             result.skipped.push({
@@ -163,6 +167,7 @@ export async function createUsernameAccounts(
     if (createdIds.length) {
         await recordAudit(admin.id, 'user.accounts_created', 'user', null, {
             count: createdIds.length,
+            section,
             courseId: course?.id ?? null,
         })
     }
@@ -170,14 +175,14 @@ export async function createUsernameAccounts(
 }
 
 /**
- * Administrators: set or clear an account's username, or give it a new password (username-only accounts
- * have no inbox for a reset link). A username-only account always keeps a username, and its placeholder
- * address follows the username so the old one is free for someone else.
+ * Administrators: set or clear an account's username, give it a new password (username-only accounts
+ * have no inbox for a reset link), or change its section. A username-only account always keeps a
+ * username, and its placeholder address follows the username so the old one is free for someone else.
  */
-export async function updateUserLogin(admin: SessionUser, userId: string, input: UpdateLoginInput) {
+export async function updateAccountDetails(admin: SessionUser, userId: string, input: UpdateAccountDetailsInput) {
     const db = supabaseAdmin()
     const profile = unwrapMaybe(
-        await db.from('profiles').select('id, email, username, display_name').eq('id', userId).maybeSingle(),
+        await db.from('profiles').select('id, email, username, section, display_name').eq('id', userId).maybeSingle(),
         'find the user',
     )
     if (!profile) throw new NotFoundError('That user doesn’t exist.', 'USER_NOT_FOUND')
@@ -207,6 +212,17 @@ export async function updateUserLogin(admin: SessionUser, userId: string, input:
         check(saved, 'save the username')
     }
 
+    const changeSection = input.section !== undefined && input.section !== profile.section
+    if (changeSection) {
+        check(
+            await db
+                .from('profiles')
+                .update({ section: input.section ?? null })
+                .eq('id', userId),
+            'save the section',
+        )
+    }
+
     if (input.password) {
         const { error } = await db.auth.admin.updateUserById(userId, { password: input.password })
         if (error) {
@@ -219,8 +235,20 @@ export async function updateUserLogin(admin: SessionUser, userId: string, input:
     await recordAudit(admin.id, 'user.login_updated', 'user', userId, {
         name: profile.display_name,
         ...(changeUsername ? { username: input.username ?? null } : {}),
+        ...(changeSection ? { section: input.section ?? null } : {}),
         passwordSet: !!input.password,
     })
+}
+
+/** The sections in use, for suggesting them when adding or editing accounts */
+export async function getSections(): Promise<string[]> {
+    const rows = unwrap(
+        await supabaseAdmin().from('profiles').select('section').not('section', 'is', null).limit(10000),
+        'load the sections',
+    )
+    return [...new Set(rows.map((r) => r.section as string))].sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true }),
+    )
 }
 
 // ── The signed-in user's own profile ──────────────────────────────────────────────────────────────

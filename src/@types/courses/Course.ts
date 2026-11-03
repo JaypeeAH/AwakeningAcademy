@@ -43,6 +43,7 @@ export interface RosterStudent {
     displayName: string
     email: string
     username: string | null
+    section: string | null
     enrolledAt: Date
     level: number
     rankCode: string

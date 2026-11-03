@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { isPlaceholderEmail, isValidUsername, parseAccountLines, placeholderEmail, signInName } from './accounts'
+import {
+    generatePassword,
+    isPlaceholderEmail,
+    isValidUsername,
+    parseAccountLines,
+    placeholderEmail,
+    signInName,
+} from './accounts'
 
 describe('usernames', () => {
     it('accepts 3–32 letters, digits, dots, dashes and underscores, in any case', () => {
@@ -19,6 +26,17 @@ describe('usernames', () => {
         expect(isPlaceholderEmail('eury@school.edu')).toBe(false)
         expect(signInName({ email, username: 'aquinoeury' })).toBe('aquinoeury')
         expect(signInName({ email: 'eury@school.edu', username: 'aquinoeury' })).toBe('eury@school.edu')
+    })
+})
+
+describe('generatePassword', () => {
+    it('makes long-enough passwords without look-alike characters, different each time', () => {
+        const passwords = Array.from({ length: 50 }, generatePassword)
+        for (const p of passwords) {
+            expect(p).toMatch(/^[a-z]{3}-[2-9]{3}-[A-Z]{3}$/)
+            expect(p).not.toMatch(/[ilo01IO]/)
+        }
+        expect(new Set(passwords).size).toBeGreaterThan(45)
     })
 })
 

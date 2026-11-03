@@ -291,7 +291,7 @@ export async function getRoster(user: SessionUser, courseId: string): Promise<Ro
         await db
             .from('course_enrollments')
             .select(
-                'enrolled_at, student:profiles(id, display_name, email, username, progress:student_progress(total_xp, level, rank:ranks(code)))',
+                'enrolled_at, student:profiles(id, display_name, email, username, section, progress:student_progress(total_xp, level, rank:ranks(code)))',
             )
             .eq('course_id', courseId),
         'load the roster',
@@ -319,6 +319,7 @@ export async function getRoster(user: SessionUser, courseId: string): Promise<Ro
                 displayName: s.display_name,
                 email: s.email,
                 username: s.username,
+                section: s.section,
                 enrolledAt: new Date(e.enrolled_at),
                 level: progress?.level ?? 1,
                 rankCode: progress?.rank?.code ?? 'F',

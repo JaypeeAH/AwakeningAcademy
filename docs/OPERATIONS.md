@@ -32,11 +32,14 @@ account exists and is a teacher, then run the file in the SQL editor. Running it
 The content lives in `src/configs/courses`; after editing it, run `npm run db:course-seed` to regenerate
 the SQL.
 
-**Username accounts.** Students without a school email can sign in with a username. In **Administration
-→ Users & roles → Add accounts**, paste one student per line (name, username, password, or three
-columns copied from a spreadsheet) and pick a course to add them to. These accounts have no inbox, so
-when a student forgets a password, set a new one with the key button on their row. That button also
-gives any email account a username as a second way to sign in.
+**Username accounts and sections.** Students without a school email can sign in with a username. In
+**Administration → Users & roles → Add accounts**, add **one student** (name, username, and a generated
+password) or **paste a list** (name, username, password per line, or three columns copied from a
+spreadsheet). You can give the new accounts a **section** (e.g. "11-STEM A") and add them to a course.
+Run `20261103000200_user_sections.sql` first. The section shows on the Users page (click it to list that
+section) and in teachers' class lists. These accounts have no inbox, so when a student forgets a
+password, set a new one with the key button on their row; the same button changes the username or
+section, and gives any email account a username as a second way to sign in.
 
 ## 3. Security settings
 
