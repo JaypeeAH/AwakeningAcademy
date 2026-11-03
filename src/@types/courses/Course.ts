@@ -42,6 +42,7 @@ export interface RosterStudent {
     id: string
     displayName: string
     email: string
+    username: string | null
     enrolledAt: Date
     level: number
     rankCode: string

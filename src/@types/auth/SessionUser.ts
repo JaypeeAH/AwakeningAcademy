@@ -4,6 +4,8 @@ import type { Permission, Role } from './Roles'
 export interface SessionUser {
     id: string
     email: string
+    /** Set by an administrator; a second way to sign in (the only one if the email is a placeholder) */
+    username: string | null
     name: string
     role: Role
     permissions: Permission[]

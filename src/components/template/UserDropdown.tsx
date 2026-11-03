@@ -8,6 +8,7 @@ import navigationIcon, { ClassIcon, RolesIcon, SignOutIcon } from '@/configs/ico
 import { helpPath, profilePath, rolesPath, signOutUrl } from '@/configs/app.config'
 import { roleLabel, roleTagClass } from '@/@types/auth/Roles'
 import useSession from '@/utils/hooks/useSession'
+import { signInName } from '@/utils/accounts'
 
 /** The signed-in user in the header: who they are, their role, profile and sign out. */
 export default function UserDropdown() {
@@ -38,7 +39,7 @@ export default function UserDropdown() {
                     <UserAvatar userId={user.id} name={user.name} size={40} />
                     <div className="min-w-0">
                         <div className="truncate font-semibold text-gray-900 dark:text-gray-100">{user.name}</div>
-                        <div className="truncate text-xs text-gray-500">{user.email}</div>
+                        <div className="truncate text-xs text-gray-500">{signInName(user)}</div>
                         <Tag className={`mt-1.5 ${roleTagClass[user.role]}`}>{roleLabel[user.role]}</Tag>
                     </div>
                 </div>

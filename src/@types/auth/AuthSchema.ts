@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { authMessages } from '@/configs/authMessages.config'
+import { isPlaceholderEmail, isValidUsername } from '@/utils/accounts'
 
 const v = authMessages.validation
 
@@ -10,11 +11,27 @@ export const DisplayNameSchema = z
     .max(60, v.displayNameLength)
     .regex(/^[^<>]*$/, v.displayNameChars)
 
-const EmailSchema = z.string().trim().toLowerCase().email(v.email)
-const NewPasswordSchema = z.string().min(8, v.passwordLength).max(72, v.passwordMax)
+const EmailSchema = z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email(v.email)
+    .refine((email) => !isPlaceholderEmail(email), v.email)
+export const NewPasswordSchema = z.string().min(8, v.passwordLength).max(72, v.passwordMax)
+
+/** An email, or the username an administrator gave the account */
+export const LoginSchema = z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(1, v.login)
+    .refine(
+        (login) => (login.includes('@') ? z.string().email().safeParse(login).success : isValidUsername(login)),
+        v.login,
+    )
 
 export const SignInSchema = z.object({
-    email: EmailSchema,
+    login: LoginSchema,
     password: z.string().min(1, v.password),
 })
 export type SignInInput = z.infer<typeof SignInSchema>

@@ -16,6 +16,7 @@ import { AddUserIcon, DeleteIcon, StudentsIcon } from '@/configs/icons.config'
 import { apiRemoveStudent } from '@/services/courses'
 import { getCourseState, useRosterStore } from '@/stores/GameStores'
 import { fromNow } from '@/utils/dates'
+import { signInName } from '@/utils/accounts'
 import type { RosterStudent } from '@/@types/courses/Course'
 
 const { THead, TBody, Tr, Th, Td } = Table
@@ -107,7 +108,7 @@ function Roster({ courseId }: RosterTabProps) {
                                                 <div className="font-semibold text-gray-900 dark:text-gray-50">
                                                     {s.displayName}
                                                 </div>
-                                                <div className="truncate text-xs text-gray-500">{s.email}</div>
+                                                <div className="truncate text-xs text-gray-500">{signInName(s)}</div>
                                             </div>
                                         </div>
                                     </Td>

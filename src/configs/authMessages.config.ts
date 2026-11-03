@@ -9,6 +9,7 @@ export const authMessages = {
     signIn: {
         title: 'Welcome back',
         subtitle: 'Sign in to continue your adventure.',
+        loginLabel: 'Email or username',
         emailLabel: 'Email',
         passwordLabel: 'Password',
         submit: 'Sign in',
@@ -46,7 +47,8 @@ export const authMessages = {
     },
     forgotPassword: {
         title: 'Forgot your password?',
-        subtitle: 'No problem. Enter your email and we’ll send you a link to choose a new one.',
+        subtitle:
+            'No problem. Enter your email and we’ll send you a link to choose a new one. Sign in with a username? Ask your teacher to set a new password for you.',
         submit: 'Send me a link',
         sentTitle: 'Check your email',
         sent: (email: string) =>
@@ -72,7 +74,8 @@ export const authMessages = {
     },
     /** Server error codes → what the person sees */
     errors: {
-        INVALID_CREDENTIALS: 'That email and password don’t match. Check for typos, or reset your password.',
+        INVALID_CREDENTIALS:
+            'That email or username and password don’t match. Check for typos, or reset your password (username-only accounts: ask your teacher).',
         EMAIL_NOT_CONFIRMED: 'Please confirm your email first. We can send the link again.',
         ACCOUNT_EXISTS: 'There’s already an account with that email. Try signing in instead.',
         WEAK_PASSWORD: 'That password is too easy to guess. Try a longer one, like a short sentence.',
@@ -84,6 +87,7 @@ export const authMessages = {
     },
     validation: {
         email: 'Enter an email address, like name@school.edu',
+        login: 'Enter your email or username',
         password: 'Enter your password',
         passwordLength: 'Use at least 8 characters',
         passwordMax: 'Use 72 characters or fewer',

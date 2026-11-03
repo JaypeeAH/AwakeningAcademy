@@ -291,7 +291,7 @@ export async function getRoster(user: SessionUser, courseId: string): Promise<Ro
         await db
             .from('course_enrollments')
             .select(
-                'enrolled_at, student:profiles(id, display_name, email, progress:student_progress(total_xp, level, rank:ranks(code)))',
+                'enrolled_at, student:profiles(id, display_name, email, username, progress:student_progress(total_xp, level, rank:ranks(code)))',
             )
             .eq('course_id', courseId),
         'load the roster',
@@ -318,6 +318,7 @@ export async function getRoster(user: SessionUser, courseId: string): Promise<Ro
                 id: s.id,
                 displayName: s.display_name,
                 email: s.email,
+                username: s.username,
                 enrolledAt: new Date(e.enrolled_at),
                 level: progress?.level ?? 1,
                 rankCode: progress?.rank?.code ?? 'F',
@@ -332,16 +333,21 @@ export async function getRoster(user: SessionUser, courseId: string): Promise<Ro
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
 }
 
-export async function addStudent(user: SessionUser, courseId: string, { email }: AddStudentInput) {
+/** Enrols an existing student account, found by its sign-in email or its username */
+export async function addStudent(user: SessionUser, courseId: string, { login }: AddStudentInput) {
     await requireCourseTeacher(user, courseId)
     const db = supabaseAdmin()
+    const byEmail = login.includes('@')
+    const lookup = db.from('profiles').select('id, role, display_name')
     const profile = unwrapMaybe(
-        await db.from('profiles').select('id, role, display_name').ilike('email', email).maybeSingle(),
+        await (byEmail ? lookup.ilike('email', login) : lookup.eq('username', login)).maybeSingle(),
         'find the student',
     )
     if (!profile) {
         throw new NotFoundError(
-            'No account uses that email. Ask the student to sign up first, or share the course join code.',
+            byEmail
+                ? 'No account uses that email. Ask the student to sign up first, or share the course join code.'
+                : 'No account has that username. Check the spelling, or ask an administrator to add the account.',
             'STUDENT_NOT_FOUND',
         )
     }

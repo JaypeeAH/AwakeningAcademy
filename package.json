@@ -14,6 +14,7 @@
         "test:watch": "vitest",
         "db:types": "node scripts/generate-db-types.mjs && prettier --write src/@types/supabase/database.types.ts",
         "db:sample-seed": "node scripts/generate-sample-seed.mjs",
+        "db:course-seed": "node scripts/generate-course-seed.mjs",
         "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
         "test:e2e": "node --env-file=.env.local node_modules/@playwright/test/cli.js test"
     },

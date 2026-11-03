@@ -2,6 +2,7 @@ import 'server-only'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { createUserClient } from '@/server/data/supabase/server'
+import { supabaseAdmin } from '@/server/data/supabase/admin'
 import { isSupabaseConfigured } from '@/server/data/supabase/config'
 import {
     DataError,
@@ -14,6 +15,7 @@ import { hasPermission, rolePermissions, type Permission, type Role } from '@/@t
 import type { SessionUser } from '@/@types/auth/SessionUser'
 import { authMessages, type AuthErrorCode } from '@/configs/authMessages.config'
 import type { EmailOnlyInput, ResetPasswordInput, SignInInput, SignUpInput } from '@/@types/auth/AuthSchema'
+import { isPlaceholderEmail } from '@/utils/accounts'
 
 /**
  * The signed-in user, or null. Verifies the session token (getClaims checks the JWT signature) and
@@ -28,7 +30,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('id, email, display_name, role')
+        .select('id, email, username, display_name, role')
         .eq('id', userId)
         .maybeSingle()
     if (!profile) return null
@@ -36,6 +38,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     return {
         id: profile.id,
         email: profile.email,
+        username: profile.username,
         name: profile.display_name,
         role: profile.role,
         permissions: [...rolePermissions[profile.role]],
@@ -98,7 +101,23 @@ const authErrorFor = (error: { name?: string; message: string; status?: number; 
     return authError('AUTH_FAILED')
 }
 
-export async function signIn({ email, password }: SignInInput) {
+/**
+ * Signs in with an email, or with a username an administrator gave the account: Supabase Auth only knows
+ * emails, so the username is looked up here (on the server) and the sign-in uses that account's address.
+ * An unknown username gets the same answer as a wrong password.
+ */
+export async function signIn({ login, password }: SignInInput) {
+    let email = login
+    if (!login.includes('@')) {
+        const { data, error } = await supabaseAdmin()
+            .from('profiles')
+            .select('email')
+            .eq('username', login)
+            .maybeSingle()
+        if (error) console.error('[auth] username lookup', error.code ?? error.message)
+        if (!data) throw authError('INVALID_CREDENTIALS')
+        email = data.email
+    }
     const supabase = await createUserClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw authErrorFor(error)
@@ -143,6 +162,8 @@ export async function resendConfirmation({ email }: EmailOnlyInput, origin: stri
 
 /** Emails a password-reset link. Always "succeeds" so it can't reveal who has an account. */
 export async function requestPasswordReset({ email }: EmailOnlyInput, origin: string) {
+    // Username-only accounts have no inbox: their teacher or an administrator sets a new password
+    if (isPlaceholderEmail(email)) return
     const supabase = await createUserClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: confirmUrl(origin, '/reset-password'),

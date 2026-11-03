@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LoginSchema } from '@/@types/auth/AuthSchema'
 
 const title = z.string().trim().min(2, 'Use at least 2 characters').max(120, 'Keep it under 120 characters')
 
@@ -26,7 +27,8 @@ export const JoinCourseSchema = z.object({
 export type JoinCourseInput = z.infer<typeof JoinCourseSchema>
 
 export const AddStudentSchema = z.object({
-    email: z.string().trim().toLowerCase().email('Enter the student’s sign-in email'),
+    /** The student's sign-in email, or their username */
+    login: LoginSchema,
 })
 export type AddStudentInput = z.infer<typeof AddStudentSchema>
 

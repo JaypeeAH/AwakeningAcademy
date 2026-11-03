@@ -43,7 +43,7 @@ export default function SignInCard({ returnTo, notice }: SignInCardProps) {
     const [resendFor, setResendFor] = useState<string | null>(null)
     const form = useForm<SignInInput>({
         resolver: zodResolver(SignInSchema),
-        defaultValues: { email: '', password: '' },
+        defaultValues: { login: '', password: '' },
     })
     const {
         control,
@@ -76,11 +76,11 @@ export default function SignInCard({ returnTo, notice }: SignInCardProps) {
             {error && (
                 <Alert showIcon type="danger" className="mb-5">
                     {error.text}
-                    {error.code === 'EMAIL_NOT_CONFIRMED' && (
+                    {error.code === 'EMAIL_NOT_CONFIRMED' && getValues('login').includes('@') && (
                         <button
                             type="button"
                             className="ml-1 font-semibold underline"
-                            onClick={() => setResendFor(getValues('email'))}
+                            onClick={() => setResendFor(getValues('login'))}
                         >
                             {authMessages.checkEmail.resend}
                         </button>
@@ -90,21 +90,23 @@ export default function SignInCard({ returnTo, notice }: SignInCardProps) {
             <FormProvider {...form}>
                 <Form onSubmit={form.handleSubmit(onValid)} noValidate>
                     <FormItem
-                        label={m.emailLabel}
-                        htmlFor="email"
-                        invalid={!!errors.email}
-                        errorMessage={errors.email?.message}
+                        label={m.loginLabel}
+                        htmlFor="login"
+                        invalid={!!errors.login}
+                        errorMessage={errors.login?.message}
                     >
                         <Controller
-                            name="email"
+                            name="login"
                             control={control}
                             render={({ field }) => (
                                 <Input
-                                    id="email"
-                                    type="email"
-                                    inputMode="email"
-                                    autoComplete="email"
-                                    invalid={!!errors.email}
+                                    id="login"
+                                    type="text"
+                                    autoCapitalize="none"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    autoComplete="username"
+                                    invalid={!!errors.login}
                                     {...field}
                                 />
                             )}

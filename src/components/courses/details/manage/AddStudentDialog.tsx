@@ -19,12 +19,12 @@ interface AddStudentDialogProps {
     onClose: () => void
 }
 
-/** Enrol an existing student account by its sign-in email */
+/** Enrol an existing student account by its sign-in email or username */
 export default function AddStudentDialog({ courseId, isOpen, onClose }: AddStudentDialogProps) {
     const setRoster = useRosterStore(courseId, (s) => s.setData)
     const form = useForm<AddStudentFormData>({
         resolver: zodResolver(AddStudentFormSchema),
-        defaultValues: { email: '' },
+        defaultValues: { login: '' },
     })
     const {
         control,
@@ -37,15 +37,15 @@ export default function AddStudentDialog({ courseId, isOpen, onClose }: AddStude
         onClose()
     }
 
-    const onValid = async ({ email }: AddStudentFormData) => {
+    const onValid = async ({ login }: AddStudentFormData) => {
         try {
-            setRoster(await apiAddStudent(courseId, { email }))
+            setRoster(await apiAddStudent(courseId, { login }))
             void getCourseState(courseId).refresh()
-            toastSuccess(`${email} added to the course.`)
+            toastSuccess(`${login} added to the course.`)
             close()
         } catch (error) {
             // The server explains what to do (e.g. ask them to sign up, or share the join code)
-            setError('email', { message: tryGetErrorMessage(error) })
+            setError('login', { message: tryGetErrorMessage(error) })
         }
     }
 
@@ -65,21 +65,22 @@ export default function AddStudentDialog({ courseId, isOpen, onClose }: AddStude
             <FormProvider {...form}>
                 <Form id={FORM_ID} onSubmit={form.handleSubmit(onValid)} noValidate>
                     <FormItem
-                        label="Student’s email"
-                        htmlFor="student-email"
+                        label="Student’s email or username"
+                        htmlFor="student-login"
                         asterisk
-                        invalid={!!errors.email}
-                        errorMessage={errors.email?.message}
+                        invalid={!!errors.login}
+                        errorMessage={errors.login?.message}
                     >
                         <Controller
-                            name="email"
+                            name="login"
                             control={control}
                             render={({ field }) => (
                                 <Input
-                                    id="student-email"
-                                    type="email"
+                                    id="student-login"
                                     autoComplete="off"
-                                    invalid={!!errors.email}
+                                    autoCapitalize="none"
+                                    spellCheck={false}
+                                    invalid={!!errors.login}
                                     {...field}
                                 />
                             )}

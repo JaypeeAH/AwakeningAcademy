@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { CourseDetailsSchema } from '@/@types/courses/CourseSchema'
+import { isValidUsername } from '@/utils/accounts'
 
 /** Create / edit course dialogs */
 export const CourseFormSchema = CourseDetailsSchema.extend({
@@ -14,6 +15,13 @@ export const ModuleFormSchema = z.object({
 export type ModuleFormData = z.infer<typeof ModuleFormSchema>
 
 export const AddStudentFormSchema = z.object({
-    email: z.string().trim().toLowerCase().email('Enter the student’s sign-in email'),
+    login: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .refine(
+            (login) => (login.includes('@') ? z.string().email().safeParse(login).success : isValidUsername(login)),
+            'Enter the student’s sign-in email or username',
+        ),
 })
 export type AddStudentFormData = z.infer<typeof AddStudentFormSchema>

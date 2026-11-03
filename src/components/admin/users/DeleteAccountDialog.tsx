@@ -5,6 +5,7 @@ import Input from '@/components/ui/Input'
 import { toastError, toastSuccess } from '@/components/ui/toast/toast'
 import ConfirmDialog from '@/components/shared/ConfirmDialog'
 import { apiDeleteUser } from '@/services/users'
+import { signInName } from '@/utils/accounts'
 import type { UserAccount } from '@/@types/users/UserAccount'
 
 interface DeleteAccountDialogProps {
@@ -13,11 +14,12 @@ interface DeleteAccountDialogProps {
     onDeleted: () => void
 }
 
-/** Privacy requests: delete an account permanently, confirmed by typing the person's email */
+/** Privacy requests: delete an account permanently, confirmed by typing the person's email (or username, if they have no email) */
 export default function DeleteAccountDialog({ user, onClose, onDeleted }: DeleteAccountDialogProps) {
     const [typed, setTyped] = useState('')
     const [busy, setBusy] = useState(false)
-    const matches = !!user && typed.trim().toLowerCase() === user.email.toLowerCase()
+    const confirmWith = user ? signInName(user) : ''
+    const matches = !!user && typed.trim().toLowerCase() === confirmWith.toLowerCase()
 
     const close = () => {
         setTyped('')
@@ -58,7 +60,7 @@ export default function DeleteAccountDialog({ user, onClose, onDeleted }: Delete
                 Courses and activities they created stay, without a creator. Consider downloading their data first.
             </p>
             <label htmlFor="delete-confirm-email" className="form-label mt-4 mb-1 block">
-                Type <strong className="select-all">{user?.email}</strong> to confirm
+                Type <strong className="select-all">{confirmWith}</strong> to confirm
             </label>
             <Input
                 id="delete-confirm-email"

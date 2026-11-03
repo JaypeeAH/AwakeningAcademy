@@ -1404,6 +1404,7 @@ export type Database = {
                     created_at: string
                     updated_at: string
                     leaderboard_hidden: boolean
+                    username: string | null
                 }
                 Insert: {
                     id: string
@@ -1414,6 +1415,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                     leaderboard_hidden?: boolean
+                    username?: string | null
                 }
                 Update: {
                     id?: string
@@ -1424,6 +1426,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                     leaderboard_hidden?: boolean
+                    username?: string | null
                 }
                 Relationships: [
                     {

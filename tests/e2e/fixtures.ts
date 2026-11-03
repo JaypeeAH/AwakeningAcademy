@@ -105,7 +105,7 @@ export class World {
         this.contexts.push(context)
         const page = await context.newPage()
         await page.goto('/login')
-        await page.locator('#email').fill(account.email)
+        await page.locator('#login').fill(account.email)
         await page.locator('#password').fill(account.password)
         await page.locator('button[type=submit]').click()
         await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 60_000 })

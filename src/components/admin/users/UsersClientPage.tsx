@@ -18,7 +18,17 @@ import { LevelBadge, RankTag } from '@/components/game/GameTags'
 import ChangeRoleDialog from './ChangeRoleDialog'
 import AdjustXpDialog from './AdjustXpDialog'
 import DeleteAccountDialog from './DeleteAccountDialog'
-import { DeleteIcon, FileIcon, SearchIcon, StudentsIcon, XpIcon } from '@/configs/icons.config'
+import AddAccountsDialog from './AddAccountsDialog'
+import SignInDetailsDialog from './SignInDetailsDialog'
+import {
+    AddUserIcon,
+    DeleteIcon,
+    FileIcon,
+    PasswordIcon,
+    SearchIcon,
+    StudentsIcon,
+    XpIcon,
+} from '@/configs/icons.config'
 import { homePath } from '@/configs/app.config'
 import { useUsersStore } from '@/stores/AdminStores'
 import { getUserExportUrl } from '@/services/users'
@@ -27,6 +37,7 @@ import useSession from '@/utils/hooks/useSession'
 import useDebouncedValue from '@/utils/hooks/useDebouncedValue'
 import { usePageBreadcrumbs } from '@/utils/hooks/useBreadcrumbs'
 import { formatDate } from '@/utils/dates'
+import { isPlaceholderEmail } from '@/utils/accounts'
 import type { UserAccount } from '@/@types/users/UserAccount'
 import { USERS_PAGE_SIZE } from '@/constants/app.constant'
 
@@ -62,7 +73,7 @@ function UserSearch() {
                 size="sm"
                 type="search"
                 prefix={<SearchIcon className="text-lg text-gray-400" />}
-                placeholder="Search by name or email"
+                placeholder="Search by name, email or username"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />
@@ -85,6 +96,8 @@ export default function UsersClientPage() {
     const [roleChange, setRoleChange] = useState<{ user: UserAccount; role: Role } | null>(null)
     const [adjusting, setAdjusting] = useState<UserAccount | null>(null)
     const [deleting, setDeleting] = useState<UserAccount | null>(null)
+    const [adding, setAdding] = useState(false)
+    const [editingLogin, setEditingLogin] = useState<UserAccount | null>(null)
 
     const records = data?.records ?? []
     const filtered = !!query.q || !!query.role
@@ -94,7 +107,12 @@ export default function UsersClientPage() {
             <PageHeader
                 eyebrow="Administration"
                 title="Users & roles"
-                description="Everyone signs up as a student. Give teachers and administrators their role here. Changes are recorded in the audit log."
+                description="Everyone signs up as a student. Give teachers and administrators their role here, and add accounts for students without an email. Changes are recorded in the audit log."
+                actions={
+                    <Button variant="solid" size="sm" icon={<AddUserIcon />} onClick={() => setAdding(true)}>
+                        Add accounts
+                    </Button>
+                }
             />
             <Card bodyClass="p-0">
                 <div className="flex flex-col gap-3 border-b border-gray-200 p-4 md:flex-row md:items-center md:justify-between dark:border-gray-700">
@@ -195,7 +213,14 @@ export default function UsersClientPage() {
                                                                     )}
                                                                 </div>
                                                                 <div className="truncate text-xs text-gray-500">
-                                                                    {account.email}
+                                                                    {isPlaceholderEmail(account.email)
+                                                                        ? 'No email'
+                                                                        : account.email}
+                                                                    {account.username && (
+                                                                        <span className="ml-1.5 font-mono">
+                                                                            @{account.username}
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -240,6 +265,15 @@ export default function UsersClientPage() {
                                                                     Adjust XP
                                                                 </Button>
                                                             )}
+                                                            <Tooltip title="Username and password">
+                                                                <Button
+                                                                    size="xs"
+                                                                    variant="plain"
+                                                                    icon={<PasswordIcon />}
+                                                                    aria-label={`Sign-in details for ${account.displayName}`}
+                                                                    onClick={() => setEditingLogin(account)}
+                                                                />
+                                                            </Tooltip>
                                                             <Tooltip title="Download everything stored about this person (JSON)">
                                                                 <a
                                                                     href={getUserExportUrl(account.id)}
@@ -291,6 +325,10 @@ export default function UsersClientPage() {
                 role={roleChange?.role ?? null}
                 onClose={() => setRoleChange(null)}
             />
+            {adding && <AddAccountsDialog onClose={() => setAdding(false)} />}
+            {editingLogin && (
+                <SignInDetailsDialog key={editingLogin.id} user={editingLogin} onClose={() => setEditingLogin(null)} />
+            )}
             {adjusting && <AdjustXpDialog key={adjusting.id} student={adjusting} onClose={() => setAdjusting(null)} />}
             <DeleteAccountDialog
                 user={deleting}

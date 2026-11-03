@@ -26,6 +26,18 @@ Never edit a migration that has already been applied; add a new one instead.
 The two `…_enums.sql` files must run on their own, before the migration that follows them. Postgres
 can't use a new enum value in the same transaction that adds it.
 
+**Full courses.** `supabase/seeds/finite_mathematics_2.sql` installs Finite Mathematics 2 (4 units,
+lessons, quizzes and boss battles), published, for limuel.hernandez@deped.gov.ph. Make sure that
+account exists and is a teacher, then run the file in the SQL editor. Running it again changes nothing.
+The content lives in `src/configs/courses`; after editing it, run `npm run db:course-seed` to regenerate
+the SQL.
+
+**Username accounts.** Students without a school email can sign in with a username. In **Administration
+→ Users & roles → Add accounts**, paste one student per line (name, username, password, or three
+columns copied from a spreadsheet) and pick a course to add them to. These accounts have no inbox, so
+when a student forgets a password, set a new one with the key button on their row. That button also
+gives any email account a username as a second way to sign in.
+
 ## 3. Security settings
 
 - **Rate limits.** These are enforced by the database (`hit_rate_limit`), so they hold across every
